@@ -13,13 +13,6 @@ Track agent activity and revoke access when needed
 The Solution
 Agent Identity provides a lightweight identity layer for AI agents:
 
-// Register an agent
-const agent = await agentAuth.register({
-name: "my-research-bot",
-owner: "user@example.com",
-permissions: ["read_data", "call_apis"]
-});
-
 // Agent receives a signed token
 console.log(agent.token); // eyJhbGc...
 
