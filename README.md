@@ -16,9 +16,6 @@ Agent Identity provides a lightweight identity layer for AI agents:
 // Agent receives a signed token
 console.log(agent.token); // eyJhbGc...
 
-// Other services verify the agent
-const verified = await agentAuth.verify(agent.token);
-// { valid: true, agent_id: "agt_123", permissions: [...] }
 Features
 🔐 Cryptographic Identity - JWT-based agent tokens
 ⚡ Fast Verification - Sub-10ms token validation
