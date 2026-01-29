@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.example
+*.log
+.DS_Store
+test.js
+TESTING_GUIDE.md
+QUICK_START.md
+MIGRATION_SAFE.sql
+DIAGNOSTIC.sql
+VERIFY_DATABASE.sql

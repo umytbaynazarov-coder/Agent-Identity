@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentAuth - Auth0 for AI Agents</title>
+    <meta name="description" content="Issue cryptographically signed identities for autonomous AI agents. Verify agent authenticity, enforce permissions, and track activity.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            opacity: 0.95;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.85;
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin-top: -50px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .feature h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .code-section {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 40px 0;
+            overflow-x: auto;
+        }
+
+        .code-section h3 {
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .api-url {
+            background: #f3f4f6;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin: 30px 0;
+            font-family: monospace;
+            font-size: 1.1rem;
+            word-break: break-all;
+        }
+
+        .use-cases {
+            margin: 60px 0;
+        }
+
+        .use-case {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #764ba2;
+        }
+
+        .use-case h4 {
+            color: #764ba2;
+            margin-bottom: 8px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+            margin-top: 60px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.9;
+            transition: opacity 0.3s;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .main-content {
+                padding: 40px 20px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AgentAuth</h1>
+            <div class="subtitle">Auth0 for AI Agents</div>
+            <p class="tagline">Issue cryptographically signed identities for autonomous AI agents. Verify agent authenticity, enforce permissions, and track activity - all in 3 lines of code.</p>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                <span>API Live & Production Ready</span>
+            </div>
+
+            <div class="cta-buttons">
+                <a href="#quickstart" class="btn btn-primary">Get Started</a>
+                <a href="https://agentauth-production-b6b2.up.railway.app/health" class="btn btn-secondary" target="_blank">View API Status</a>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <section>
+                <h2 style="text-align: center; margin-bottom: 40px; color: #667eea; font-size: 2rem;">The Problem</h2>
+                <p style="font-size: 1.1rem; text-align: center; max-width: 800px; margin: 0 auto;">
+                    AI agents need to interact with each other and external services, but there's no standard way to prove an agent belongs to a legitimate owner, enforce permissions, or track activity.
+                </p>
+            </section>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Cryptographic Identity</h3>
+                    <p>JWT-based agent tokens with SHA-256 hashing</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Fast Verification</h3>
+                    <p>Sub-10ms token validation</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Permission System</h3>
+                    <p>Define what each agent can do</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>Activity Tracking</h3>
+                    <p>Audit log of all agent actions</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🚫</div>
+                    <h3>Instant Revocation</h3>
+                    <p>Deactivate compromised agents immediately</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Simple Integration</h3>
+                    <p>3 lines of code to get started</p>
+                </div>
+            </div>
+
+            <section id="quickstart">
+                <h2 style="text-align: center; margin-bottom: 40px; color: #667eea; font-size: 2rem;">Quick Start</h2>
+
+                <div class="api-url">
+                    <strong>Production API:</strong> https://agentauth-production-b6b2.up.railway.app
+                </div>
+
+                <div class="code-section">
+                    <h3>1. Register an Agent</h3>
+                    <pre>curl -X POST https://agentauth-production-b6b2.up.railway.app/agents/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my-agent",
+    "owner_email": "you@example.com",
+    "permissions": ["read", "write"]
+  }'</pre>
+                </div>
+
+                <div class="code-section">
+                    <h3>2. Verify Agent & Get JWT Token</h3>
+                    <pre>curl -X POST https://agentauth-production-b6b2.up.railway.app/agents/verify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "agt_xxx",
+    "api_key": "ak_xxx"
+  }'</pre>
+                </div>
+
+                <div class="code-section">
+                    <h3>3. Access Protected Resources</h3>
+                    <pre>curl https://agentauth-production-b6b2.up.railway.app/agents/agt_xxx \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</pre>
+                </div>
+            </section>
+
+            <section class="use-cases">
+                <h2 style="text-align: center; margin-bottom: 40px; color: #667eea; font-size: 2rem;">Use Cases</h2>
+
+                <div class="use-case">
+                    <h4>Agent-to-Agent Payments</h4>
+                    <p>Verify the agent requesting payment is authorized by the legitimate owner</p>
+                </div>
+
+                <div class="use-case">
+                    <h4>API Access Control</h4>
+                    <p>Gate your APIs to verified agents only, preventing rogue bots</p>
+                </div>
+
+                <div class="use-case">
+                    <h4>Compliance & Audit</h4>
+                    <p>Track which agent performed which action with full audit logs</p>
+                </div>
+
+                <div class="use-case">
+                    <h4>Multi-Agent Systems</h4>
+                    <p>Agents verify each other before collaborating on tasks</p>
+                </div>
+            </section>
+
+            <section style="text-align: center; margin-top: 60px; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+                <h2 style="margin-bottom: 20px;">Ready to Ship?</h2>
+                <p style="font-size: 1.1rem; margin-bottom: 30px;">Production-ready API. 8/8 security tests passing. Full audit logging.</p>
+                <div class="cta-buttons">
+                    <a href="https://github.com/yourusername/Agent-Identity" class="btn btn-primary" target="_blank">View on GitHub</a>
+                    <a href="https://agentauth-production-b6b2.up.railway.app/health" class="btn btn-secondary" target="_blank">API Health Check</a>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p>Built with Express, Supabase, JWT</p>
+            <p style="margin-top: 10px; opacity: 0.8;">Like Auth0, but for AI agents. Building in public.</p>
+            <div class="footer-links">
+                <a href="https://github.com/yourusername/Agent-Identity">GitHub</a>
+                <a href="https://agentauth-production-b6b2.up.railway.app/health">API Status</a>
+                <a href="https://twitter.com/yourusername">Twitter/X</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
