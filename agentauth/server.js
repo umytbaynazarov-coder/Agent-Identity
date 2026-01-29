@@ -9,49 +9,22 @@ const app = express();
 
 // CORS configuration - allow frontend domains
 const corsOptions = {
-  origin: function (origin, callback) {
-    // #region agent log
-    console.log('[DEBUG H1/H5] CORS origin check:', { origin, timestamp: Date.now() });
-    // #endregion
-    const allowedOrigins = [
-      'https://agentauths.com',
-      'https://www.agentauths.com',
-      'http://localhost:3000',
-      'http://localhost:5500',
-      'http://127.0.0.1:5500'
-    ];
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin || allowedOrigins.includes(origin)) {
-      // #region agent log
-      console.log('[DEBUG H5] Origin ALLOWED:', origin);
-      // #endregion
-      callback(null, true);
-    } else {
-      // #region agent log
-      console.log('[DEBUG H5] Origin REJECTED:', origin);
-      // #endregion
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'https://agentauths.com',
+    'https://www.agentauths.com',
+    'http://localhost:3000',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
-  optionsSuccessStatus: 200  // For legacy browser support
+  optionsSuccessStatus: 200
 };
-
-// #region agent log
-console.log('[DEBUG H2/H3] CORS middleware loading...', { timestamp: Date.now() });
-// #endregion
 
 // Handle preflight requests explicitly
 app.options('*', cors(corsOptions));
-
 app.use(cors(corsOptions));
-
-// #region agent log
-console.log('[DEBUG H3] CORS middleware registered successfully');
-// #endregion
-
 app.use(express.json());
 
 // Supabase client
@@ -77,15 +50,11 @@ function generateAgentId() {
 // HEALTH CHECK
 // ============================================
 app.get('/health', (req, res) => {
-  // #region agent log
-  console.log('[DEBUG H3] Health endpoint hit, CORS headers should be set:', { origin: req.headers.origin });
-  // #endregion
   res.json({
     status: 'healthy',
     service: 'AgentAuths API',
     version: '0.1.0',
-    timestamp: new Date().toISOString(),
-    cors_enabled: true
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -94,9 +63,6 @@ app.get('/health', (req, res) => {
 // Register a new agent and get credentials
 // ============================================
 app.post('/agents/register', async (req, res) => {
-  // #region agent log
-  console.log('[DEBUG H4] Register endpoint hit:', { origin: req.headers.origin, method: req.method, timestamp: Date.now() });
-  // #endregion
   try {
     const { name, description, owner_email, permissions } = req.body;
 
