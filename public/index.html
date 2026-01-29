@@ -225,6 +225,235 @@
             text-decoration: underline;
         }
 
+        /* Interactive Playground Styles */
+        .playground-section {
+            margin: 60px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+            border: 2px solid #667eea;
+        }
+
+        .playground-section h2 {
+            text-align: center;
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .playground-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .playground-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .demo-steps {
+            display: grid;
+            gap: 25px;
+        }
+
+        .demo-step {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .demo-step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .step-description {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            padding-left: 55px;
+        }
+
+        .demo-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .demo-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .demo-btn.loading {
+            position: relative;
+        }
+
+        .demo-btn.loading::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .output-container {
+            margin-top: 15px;
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .output-header {
+            background: #2d2d2d;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .output-label {
+            color: #888;
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+
+        .output-status {
+            font-size: 0.8rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .output-status.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .output-status.waiting {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .output-status.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .demo-output {
+            color: #d4d4d4;
+            padding: 15px;
+            margin: 0;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            max-height: 250px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .demo-output .key {
+            color: #9cdcfe;
+        }
+
+        .demo-output .string {
+            color: #ce9178;
+        }
+
+        .demo-output .number {
+            color: #b5cea8;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 1px solid #555;
+            color: #888;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #3d3d3d;
+            color: white;
+        }
+
+        .playground-note {
+            text-align: center;
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            color: #667eea;
+            font-size: 0.95rem;
+        }
+
+        .playground-note strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2.5rem;
@@ -246,6 +475,18 @@
             .btn {
                 width: 100%;
             }
+
+            .playground-section {
+                padding: 25px 15px;
+            }
+
+            .step-description {
+                padding-left: 0;
+            }
+
+            .demo-output {
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -262,8 +503,8 @@
             </div>
 
             <div class="cta-buttons">
-                <a href="#quickstart" class="btn btn-primary">Get Started</a>
-                <a href="https://agentauth-production-b6b2.up.railway.app/health" class="btn btn-secondary" target="_blank">View API Status</a>
+                <a href="#try-now" class="btn btn-primary">Try It Now</a>
+                <a href="#quickstart" class="btn btn-secondary">View Docs</a>
             </div>
         </header>
 
@@ -343,6 +584,94 @@
                 </div>
             </section>
 
+            <!-- Interactive API Playground -->
+            <section id="try-now" class="playground-section">
+                <div style="text-align: center;">
+                    <span class="playground-badge">No Signup Required</span>
+                </div>
+                <h2>Try AgentAuth Right Now</h2>
+                <p class="playground-subtitle">Test the full authentication flow directly in your browser</p>
+
+                <div class="demo-steps">
+                    <!-- Step 1: Register -->
+                    <div class="demo-step">
+                        <div class="step-header">
+                            <span class="step-number">1</span>
+                            <span class="step-title">Register a Demo Agent</span>
+                        </div>
+                        <p class="step-description">Create a new agent with read permissions. This generates a unique agent_id and api_key.</p>
+                        <button class="demo-btn" onclick="registerDemoAgent()" id="btn-register">
+                            <span>Register Agent</span>
+                        </button>
+                        <div class="output-container">
+                            <div class="output-header">
+                                <span class="output-label">Response</span>
+                                <span class="output-status waiting" id="status-register">Waiting...</span>
+                            </div>
+                            <pre class="demo-output" id="register-output">// Click "Register Agent" to see the response
+{
+  "agent_id": "agt_...",
+  "api_key": "ak_...",
+  "message": "Agent registered successfully"
+}</pre>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Verify -->
+                    <div class="demo-step">
+                        <div class="step-header">
+                            <span class="step-number">2</span>
+                            <span class="step-title">Verify & Get JWT Token</span>
+                        </div>
+                        <p class="step-description">Exchange your credentials for a JWT token that can be used to authenticate requests.</p>
+                        <button class="demo-btn" onclick="verifyDemoAgent()" id="btn-verify" disabled>
+                            <span>Verify Agent</span>
+                        </button>
+                        <div class="output-container">
+                            <div class="output-header">
+                                <span class="output-label">Response</span>
+                                <span class="output-status waiting" id="status-verify">Waiting...</span>
+                            </div>
+                            <pre class="demo-output" id="verify-output">// First register an agent above
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "expires_in": "24h"
+}</pre>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Use JWT -->
+                    <div class="demo-step">
+                        <div class="step-header">
+                            <span class="step-number">3</span>
+                            <span class="step-title">Use JWT to Access Resources</span>
+                        </div>
+                        <p class="step-description">Make an authenticated request using the JWT token to retrieve agent details.</p>
+                        <button class="demo-btn" onclick="useJWT()" id="btn-use" disabled>
+                            <span>Fetch Agent Details</span>
+                        </button>
+                        <div class="output-container">
+                            <div class="output-header">
+                                <span class="output-label">Response</span>
+                                <span class="output-status waiting" id="status-use">Waiting...</span>
+                            </div>
+                            <pre class="demo-output" id="use-output">// First verify your agent above
+{
+  "id": "agt_...",
+  "name": "Demo Agent",
+  "status": "active",
+  "permissions": ["read"]
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="playground-note">
+                    <strong>🔒 Safe to Test</strong>
+                    Demo agents are created with limited permissions and can be cleaned up anytime.
+                </div>
+            </section>
+
             <section class="use-cases">
                 <h2 style="text-align: center; margin-bottom: 40px; color: #667eea; font-size: 2rem;">Use Cases</h2>
 
@@ -387,5 +716,161 @@
             </div>
         </footer>
     </div>
+
+    <script>
+        const API_BASE = 'https://agentauth-production-b6b2.up.railway.app';
+        let demoCredentials = {};
+
+        // Helper to format JSON with syntax highlighting
+        function formatJSON(obj) {
+            const json = JSON.stringify(obj, null, 2);
+            return json
+                .replace(/"([^"]+)":/g, '<span class="key">"$1"</span>:')
+                .replace(/: "([^"]+)"/g, ': <span class="string">"$1"</span>')
+                .replace(/: (\d+)/g, ': <span class="number">$1</span>')
+                .replace(/: (true|false)/g, ': <span class="number">$1</span>');
+        }
+
+        // Update status indicator
+        function setStatus(elementId, status, text) {
+            const el = document.getElementById(elementId);
+            el.className = 'output-status ' + status;
+            el.textContent = text || (status === 'success' ? '200 OK' : status === 'error' ? 'Error' : 'Waiting...');
+        }
+
+        // Set button loading state
+        function setLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            if (loading) {
+                btn.classList.add('loading');
+                btn.disabled = true;
+            } else {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        async function registerDemoAgent() {
+            const btn = document.getElementById('btn-register');
+            const output = document.getElementById('register-output');
+            
+            setLoading('btn-register', true);
+            setStatus('status-register', 'waiting', 'Loading...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/agents/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'Demo Agent ' + Date.now(),
+                        description: 'Testing AgentAuth from the interactive playground',
+                        owner_email: 'demo@test.com',
+                        permissions: ['read']
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store credentials from the actual API response structure
+                    demoCredentials = {
+                        agent_id: data.agent.agent_id,
+                        api_key: data.credentials.api_key
+                    };
+                    output.innerHTML = formatJSON(data);
+                    setStatus('status-register', 'success', `${response.status} OK`);
+                    
+                    // Enable next step
+                    document.getElementById('btn-verify').disabled = false;
+                } else {
+                    output.innerHTML = formatJSON(data);
+                    setStatus('status-register', 'error', `${response.status} Error`);
+                }
+            } catch (error) {
+                output.innerHTML = formatJSON({ error: error.message });
+                setStatus('status-register', 'error', 'Network Error');
+            }
+            
+            setLoading('btn-register', false);
+        }
+
+        async function verifyDemoAgent() {
+            if (!demoCredentials.agent_id) {
+                alert('Please register an agent first!');
+                return;
+            }
+            
+            const output = document.getElementById('verify-output');
+            
+            setLoading('btn-verify', true);
+            setStatus('status-verify', 'waiting', 'Loading...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/agents/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        agent_id: demoCredentials.agent_id,
+                        api_key: demoCredentials.api_key
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store token from the actual API response structure
+                    demoCredentials.token = data.token.access_token;
+                    output.innerHTML = formatJSON(data);
+                    setStatus('status-verify', 'success', `${response.status} OK`);
+                    
+                    // Enable next step
+                    document.getElementById('btn-use').disabled = false;
+                } else {
+                    output.innerHTML = formatJSON(data);
+                    setStatus('status-verify', 'error', `${response.status} Error`);
+                }
+            } catch (error) {
+                output.innerHTML = formatJSON({ error: error.message });
+                setStatus('status-verify', 'error', 'Network Error');
+            }
+            
+            setLoading('btn-verify', false);
+        }
+
+        async function useJWT() {
+            if (!demoCredentials.token) {
+                alert('Please verify the agent first to get a JWT token!');
+                return;
+            }
+            
+            const output = document.getElementById('use-output');
+            
+            setLoading('btn-use', true);
+            setStatus('status-use', 'waiting', 'Loading...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/agents/${demoCredentials.agent_id}`, {
+                    headers: { 
+                        'Authorization': `Bearer ${demoCredentials.token}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    output.innerHTML = formatJSON(data);
+                    setStatus('status-use', 'success', `${response.status} OK`);
+                } else {
+                    output.innerHTML = formatJSON(data);
+                    setStatus('status-use', 'error', `${response.status} Error`);
+                }
+            } catch (error) {
+                output.innerHTML = formatJSON({ error: error.message });
+                setStatus('status-use', 'error', 'Network Error');
+            }
+            
+            setLoading('btn-use', false);
+        }
+    </script>
 </body>
 </html>
