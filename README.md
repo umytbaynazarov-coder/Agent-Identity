@@ -17,11 +17,15 @@ AI agents need to interact with each other and external services, but there's no
 Agent Identity provides a lightweight identity layer for AI agents:
 
 ```javascript
-// Register an agent
+// Register an agent with scoped permissions
 const agent = await agentAuth.register({
   name: "my-research-bot",
   owner: "user@example.com",
-  permissions: ["read_data", "call_apis"]
+  permissions: [
+    "zendesk:tickets:read",
+    "slack:messages:write",
+    "hubspot:contacts:read"
+  ]
 });
 
 // Agent receives a signed token
@@ -33,11 +37,12 @@ const verified = await agentAuth.verify(agent.token);
 ```
 
 ## Features
-- Cryptographic Identity - JWT-based agent tokens
-- Fast Verification - Sub-10ms token validation
-- Permission System - Define what each agent can do
-- Activity Tracking - Audit log of all agent actions
-- Instant Revocation - Deactivate compromised agents immediately
+- **Cryptographic Identity** - JWT-based agent tokens
+- **Fast Verification** - Sub-10ms token validation
+- **Scoped Permission System** - Granular `service:resource:action` permissions (like Auth0/AWS IAM)
+- **Activity Tracking** - Audit log of all agent actions
+- **Instant Revocation** - Deactivate compromised agents immediately
+- **Wildcard Support** - Service, resource, and admin-level wildcards
 
 ## Use Cases
 - Agent-to-Agent Payments - Verify the agent requesting payment is authorized
@@ -54,9 +59,16 @@ curl -X POST https://agentauth-production-b6b2.up.railway.app/agents/register \
   -d '{
     "name": "my-agent",
     "owner_email": "you@example.com",
-    "permissions": ["read", "write"]
+    "permissions": [
+      "zendesk:tickets:read",
+      "slack:messages:write"
+    ]
   }'
 ```
+
+**Permission Format:** `service:resource:action`
+- Examples: `zendesk:tickets:read`, `slack:messages:write`, `*:*:*` (admin)
+- See [Scoped Permissions Documentation](agentauth/SCOPED_PERMISSIONS.md) for full details
 
 **2. Verify and get a JWT token:**
 ```bash
@@ -75,7 +87,20 @@ curl https://agentauth-production-b6b2.up.railway.app/agents/agt_xxx \
 ```
 
 ## API Endpoints
+
+### Core
 - `GET /health` - Health check
-- `POST /agents/register` - Register a new agent
+- `GET /permissions/list` - List all available permissions
+- `POST /agents/register` - Register a new agent with scoped permissions
 - `POST /agents/verify` - Verify credentials and get JWT
+- `POST /agents/refresh` - Refresh access token
+- `GET /agents` - List all agents (requires admin)
 - `GET /agents/:id` - Get agent details (requires auth)
+- `POST /agents/:id/revoke` - Revoke an agent
+- `GET /agents/:id/activity` - Get agent activity logs
+
+### Integration Examples (Demo)
+- `POST /integrations/zendesk/tickets` - Example Zendesk integration
+- `POST /integrations/slack/messages` - Example Slack integration
+- `GET /integrations/hubspot/contacts` - Example HubSpot integration
+- `GET /integrations/github/repos` - Example GitHub integrationSee [Scoped Permissions Documentation](agentauth/SCOPED_PERMISSIONS.md) for detailed permission usage.

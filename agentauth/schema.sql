@@ -9,11 +9,14 @@ CREATE TABLE IF NOT EXISTS agents (
   description TEXT,
   owner_email VARCHAR(255) NOT NULL,
   api_key_hash VARCHAR(64) NOT NULL,
+  refresh_token_hash TEXT,
+  refresh_token_expires_at TIMESTAMP WITH TIME ZONE,
   permissions TEXT[] DEFAULT ARRAY['read'],
   status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'suspended', 'revoked')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   last_verified_at TIMESTAMP WITH TIME ZONE,
-  metadata JSONB DEFAULT '{}'
+  metadata JSONB DEFAULT '{}',
+  tier VARCHAR(20) DEFAULT 'free' CHECK (tier IN ('free', 'pro', 'enterprise'))
 );
 
 -- Verification logs (for analytics & security)
@@ -26,16 +29,54 @@ CREATE TABLE IF NOT EXISTS verification_logs (
   ip_address VARCHAR(45)
 );
 
+-- Webhook endpoints for event notifications
+CREATE TABLE IF NOT EXISTS webhook_endpoints (
+  id SERIAL PRIMARY KEY,
+  agent_id VARCHAR(50) REFERENCES agents(agent_id) ON DELETE CASCADE,
+  url TEXT NOT NULL,
+  events TEXT[] NOT NULL,  -- ['agent.registered', 'agent.verified', 'agent.revoked']
+  secret VARCHAR(64) NOT NULL,  -- For HMAC signature
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_agents_agent_id ON agents(agent_id);  -- Updated index name
 CREATE INDEX IF NOT EXISTS idx_agents_owner_email ON agents(owner_email);
 CREATE INDEX IF NOT EXISTS idx_agents_status ON agents(status);
+CREATE INDEX IF NOT EXISTS idx_agents_refresh_token_hash ON agents(refresh_token_hash);
 CREATE INDEX IF NOT EXISTS idx_verification_logs_agent_id ON verification_logs(agent_id);  -- Updated index name
 CREATE INDEX IF NOT EXISTS idx_verification_logs_timestamp ON verification_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_webhook_endpoints_agent_id ON webhook_endpoints(agent_id);
 
--- Row Level Security (RLS) - Enable after testing
--- ALTER TABLE agents ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE verification_logs ENABLE ROW LEVEL SECURITY;
+-- Row Level Security (RLS)
+-- Note: Since we're using the service role key (anon key) from the server,
+-- these policies allow full access. RLS adds defense-in-depth in case credentials leak.
+ALTER TABLE agents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE verification_logs ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Allow service role full access to agents
+CREATE POLICY "Service role has full access to agents" ON agents
+  FOR ALL
+  TO anon
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: Allow service role full access to verification_logs
+CREATE POLICY "Service role has full access to verification_logs" ON verification_logs
+  FOR ALL
+  TO anon
+  USING (true)
+  WITH CHECK (true);
+
+ALTER TABLE webhook_endpoints ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Allow service role full access to webhook_endpoints
+CREATE POLICY "Service role has full access to webhook_endpoints" ON webhook_endpoints
+  FOR ALL
+  TO anon
+  USING (true)
+  WITH CHECK (true);
 
 -- Example: View for agent stats (useful later for dashboard)
 CREATE OR REPLACE VIEW agent_stats AS

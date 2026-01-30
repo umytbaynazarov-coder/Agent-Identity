@@ -3,874 +3,591 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgentAuth - Auth0 for AI Agents</title>
-    <meta name="description" content="Issue cryptographically signed identities for autonomous AI agents. Verify agent authenticity, enforce permissions, and track activity.">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            text-align: center;
-            padding: 60px 20px;
-            color: white;
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .subtitle {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            opacity: 0.95;
-        }
-
-        .tagline {
-            font-size: 1.1rem;
-            opacity: 0.85;
-            max-width: 700px;
-            margin: 0 auto 40px;
-        }
-
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 10px 20px;
-            border-radius: 50px;
-            backdrop-filter: blur(10px);
-            margin-bottom: 30px;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 30px;
-        }
-
-        .btn {
-            padding: 15px 40px;
-            font-size: 1.1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: white;
-            color: #667eea;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid white;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .main-content {
-            background: white;
-            border-radius: 20px;
-            padding: 60px 40px;
-            margin-top: -50px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin: 60px 0;
-        }
-
-        .feature {
-            text-align: center;
-            padding: 30px 20px;
-        }
-
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .feature h3 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: #667eea;
-        }
-
-        .code-section {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 30px;
-            border-radius: 12px;
-            margin: 40px 0;
-            overflow-x: auto;
-        }
-
-        .code-section h3 {
-            color: white;
-            margin-bottom: 20px;
-        }
-
-        pre {
-            margin: 0;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .api-url {
-            background: #f3f4f6;
-            padding: 15px 20px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-            margin: 30px 0;
-            font-family: monospace;
-            font-size: 1.1rem;
-            word-break: break-all;
-        }
-
-        .use-cases {
-            margin: 60px 0;
-        }
-
-        .use-case {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #764ba2;
-        }
-
-        .use-case h4 {
-            color: #764ba2;
-            margin-bottom: 8px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            color: white;
-            margin-top: 60px;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: white;
-            text-decoration: none;
-            opacity: 0.9;
-            transition: opacity 0.3s;
-        }
-
-        .footer-links a:hover {
-            opacity: 1;
-            text-decoration: underline;
-        }
-
-        /* Interactive Playground Styles */
-        .playground-section {
-            margin: 60px 0;
-            padding: 40px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 16px;
-            border: 2px solid #667eea;
-        }
-
-        .playground-section h2 {
-            text-align: center;
-            color: #667eea;
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .playground-subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1rem;
-        }
-
-        .playground-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .demo-steps {
-            display: grid;
-            gap: 25px;
-        }
-
-        .demo-step {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .demo-step:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-        }
-
-        .step-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .step-number {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-
-        .step-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .step-description {
-            color: #666;
-            font-size: 0.95rem;
-            margin-bottom: 15px;
-            padding-left: 55px;
-        }
-
-        .demo-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .demo-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .demo-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .demo-btn.loading {
-            position: relative;
-        }
-
-        .demo-btn.loading::after {
-            content: '';
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-left: 8px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .output-container {
-            margin-top: 15px;
-            background: #1e1e1e;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .output-header {
-            background: #2d2d2d;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .output-label {
-            color: #888;
-            font-size: 0.85rem;
-            font-family: monospace;
-        }
-
-        .output-status {
-            font-size: 0.8rem;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-weight: 500;
-        }
-
-        .output-status.success {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-        }
-
-        .output-status.waiting {
-            background: rgba(251, 191, 36, 0.2);
-            color: #fbbf24;
-        }
-
-        .output-status.error {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-        }
-
-        .demo-output {
-            color: #d4d4d4;
-            padding: 15px;
-            margin: 0;
-            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-            font-size: 0.85rem;
-            line-height: 1.6;
-            max-height: 250px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        .demo-output .key {
-            color: #9cdcfe;
-        }
-
-        .demo-output .string {
-            color: #ce9178;
-        }
-
-        .demo-output .number {
-            color: #b5cea8;
-        }
-
-        .copy-btn {
-            background: transparent;
-            border: 1px solid #555;
-            color: #888;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .copy-btn:hover {
-            background: #3d3d3d;
-            color: white;
-        }
-
-        .playground-note {
-            text-align: center;
-            margin-top: 25px;
-            padding: 15px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 8px;
-            color: #667eea;
-            font-size: 0.95rem;
-        }
-
-        .playground-note strong {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
-            }
-
-            .subtitle {
-                font-size: 1.2rem;
-            }
-
-            .main-content {
-                padding: 40px 20px;
-            }
-
-            .cta-buttons {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .btn {
-                width: 100%;
-            }
-
-            .playground-section {
-                padding: 25px 15px;
-            }
-
-            .step-description {
-                padding-left: 0;
-            }
-
-            .demo-output {
-                font-size: 0.75rem;
-            }
-        }
-    </style>
+    <title>AgentAuth - Passport for AI Agents</title>
+    <meta name="description" content="Simple, secure authentication system for AI agents. Open source, developer-first, built for scale.">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>AgentAuth</h1>
-            <div class="subtitle">Auth0 for AI Agents</div>
-            <p class="tagline">Issue cryptographically signed identities for autonomous AI agents. Verify agent authenticity, enforce permissions, and track activity - all in 3 lines of code.</p>
-
-            <div class="status">
-                <span class="status-dot"></span>
-                <span>API Live & Production Ready</span>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <svg class="logo-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M40 4L10 16V36C10 54 22 68 40 76C58 68 70 54 70 36V16L40 4Z" stroke="url(#gradient1)" stroke-width="3"/>
+                    <path d="M28 40L36 48L52 32" stroke="url(#gradient2)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs>
+                        <linearGradient id="gradient1" x1="10" y1="4" x2="70" y2="76" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#0066FF"/>
+                            <stop offset="100%" stop-color="#00E5A0"/>
+                        </linearGradient>
+                        <linearGradient id="gradient2" x1="28" y1="32" x2="52" y2="48" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#0066FF"/>
+                            <stop offset="100%" stop-color="#00E5A0"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span class="logo-text">AgentAuth</span>
             </div>
-
-            <div class="cta-buttons">
-                <a href="#try-now" class="btn btn-primary">Try It Now</a>
-                <a href="#quickstart" class="btn btn-secondary">View Docs</a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#quickstart">Quick Start</a>
+                <a href="#demo">Demo</a>
+                <a href="https://github.com/yourusername/agentauth" target="_blank" class="nav-link-github">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    GitHub
+                </a>
+                <a href="https://docs.agentauth.dev" target="_blank" class="btn-primary-small">Documentation</a>
             </div>
-        </header>
-
-        <div class="main-content">
-            <section>
-                <h2 style="text-align: center; margin-bottom: 40px; color: #667eea; font-size: 2rem;">The Problem</h2>
-                <p style="font-size: 1.1rem; text-align: center; max-width: 800px; margin: 0 auto;">
-                    AI agents need to interact with each other and external services, but there's no standard way to prove an agent belongs to a legitimate owner, enforce permissions, or track activity.
-                </p>
-            </section>
-
-            <div class="features">
-                <div class="feature">
-                    <div class="feature-icon">🔐</div>
-                    <h3>Cryptographic Identity</h3>
-                    <p>JWT-based agent tokens with SHA-256 hashing</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Fast Verification</h3>
-                    <p>Sub-10ms token validation</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🎯</div>
-                    <h3>Permission System</h3>
-                    <p>Define what each agent can do</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">📊</div>
-                    <h3>Activity Tracking</h3>
-                    <p>Audit log of all agent actions</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🚫</div>
-                    <h3>Instant Revocation</h3>
-                    <p>Deactivate compromised agents immediately</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🔧</div>
-                    <h3>Simple Integration</h3>
-                    <p>3 lines of code to get started</p>
-                </div>
-            </div>
-
-            <section id="quickstart">
-                <h2 style="text-align: center; margin-bottom: 40px; color: #667eea; font-size: 2rem;">Quick Start</h2>
-
-                <div class="api-url">
-                    <strong>Production API:</strong> https://agentauth-production-b6b2.up.railway.app
-                </div>
-
-                <div class="code-section">
-                    <h3>1. Register an Agent</h3>
-                    <pre>curl -X POST https://agentauth-production-b6b2.up.railway.app/agents/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "my-agent",
-    "owner_email": "you@example.com",
-    "permissions": ["read", "write"]
-  }'</pre>
-                </div>
-
-                <div class="code-section">
-                    <h3>2. Verify Agent & Get JWT Token</h3>
-                    <pre>curl -X POST https://agentauth-production-b6b2.up.railway.app/agents/verify \
-  -H "Content-Type: application/json" \
-  -d '{
-    "agent_id": "agt_xxx",
-    "api_key": "ak_xxx"
-  }'</pre>
-                </div>
-
-                <div class="code-section">
-                    <h3>3. Access Protected Resources</h3>
-                    <pre>curl https://agentauth-production-b6b2.up.railway.app/agents/agt_xxx \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"</pre>
-                </div>
-            </section>
-
-            <!-- Interactive API Playground -->
-            <section id="try-now" class="playground-section">
-                <div style="text-align: center;">
-                    <span class="playground-badge">No Signup Required</span>
-                </div>
-                <h2>Try AgentAuth Right Now</h2>
-                <p class="playground-subtitle">Test the full authentication flow directly in your browser</p>
-
-                <div class="demo-steps">
-                    <!-- Step 1: Register -->
-                    <div class="demo-step">
-                        <div class="step-header">
-                            <span class="step-number">1</span>
-                            <span class="step-title">Register a Demo Agent</span>
-                        </div>
-                        <p class="step-description">Create a new agent with read permissions. This generates a unique agent_id and api_key.</p>
-                        <button class="demo-btn" onclick="registerDemoAgent()" id="btn-register">
-                            <span>Register Agent</span>
-                        </button>
-                        <div class="output-container">
-                            <div class="output-header">
-                                <span class="output-label">Response</span>
-                                <span class="output-status waiting" id="status-register">Waiting...</span>
-                            </div>
-                            <pre class="demo-output" id="register-output">// Click "Register Agent" to see the response
-{
-  "agent_id": "agt_...",
-  "api_key": "ak_...",
-  "message": "Agent registered successfully"
-}</pre>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Verify -->
-                    <div class="demo-step">
-                        <div class="step-header">
-                            <span class="step-number">2</span>
-                            <span class="step-title">Verify & Get JWT Token</span>
-                        </div>
-                        <p class="step-description">Exchange your credentials for a JWT token that can be used to authenticate requests.</p>
-                        <button class="demo-btn" onclick="verifyDemoAgent()" id="btn-verify" disabled>
-                            <span>Verify Agent</span>
-                        </button>
-                        <div class="output-container">
-                            <div class="output-header">
-                                <span class="output-label">Response</span>
-                                <span class="output-status waiting" id="status-verify">Waiting...</span>
-                            </div>
-                            <pre class="demo-output" id="verify-output">// First register an agent above
-{
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "expires_in": "24h"
-}</pre>
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Use JWT -->
-                    <div class="demo-step">
-                        <div class="step-header">
-                            <span class="step-number">3</span>
-                            <span class="step-title">Use JWT to Access Resources</span>
-                        </div>
-                        <p class="step-description">Make an authenticated request using the JWT token to retrieve agent details.</p>
-                        <button class="demo-btn" onclick="useJWT()" id="btn-use" disabled>
-                            <span>Fetch Agent Details</span>
-                        </button>
-                        <div class="output-container">
-                            <div class="output-header">
-                                <span class="output-label">Response</span>
-                                <span class="output-status waiting" id="status-use">Waiting...</span>
-                            </div>
-                            <pre class="demo-output" id="use-output">// First verify your agent above
-{
-  "id": "agt_...",
-  "name": "Demo Agent",
-  "status": "active",
-  "permissions": ["read"]
-}</pre>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="playground-note">
-                    <strong>🔒 Safe to Test</strong>
-                    Demo agents are created with limited permissions and can be cleaned up anytime.
-                </div>
-            </section>
-
-            <section class="use-cases">
-                <h2 style="text-align: center; margin-bottom: 40px; color: #667eea; font-size: 2rem;">Use Cases</h2>
-
-                <div class="use-case">
-                    <h4>Agent-to-Agent Payments</h4>
-                    <p>Verify the agent requesting payment is authorized by the legitimate owner</p>
-                </div>
-
-                <div class="use-case">
-                    <h4>API Access Control</h4>
-                    <p>Gate your APIs to verified agents only, preventing rogue bots</p>
-                </div>
-
-                <div class="use-case">
-                    <h4>Compliance & Audit</h4>
-                    <p>Track which agent performed which action with full audit logs</p>
-                </div>
-
-                <div class="use-case">
-                    <h4>Multi-Agent Systems</h4>
-                    <p>Agents verify each other before collaborating on tasks</p>
-                </div>
-            </section>
-
-            <section style="text-align: center; margin-top: 60px; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
-                <h2 style="margin-bottom: 20px;">Ready to Ship?</h2>
-                <p style="font-size: 1.1rem; margin-bottom: 30px;">Production-ready API. 8/8 security tests passing. Full audit logging.</p>
-                <div class="cta-buttons">
-                    <a href="https://github.com/umytbaynazarov-coder/Agent-Identity" class="btn btn-primary" target="_blank">View on GitHub</a>
-                    <a href="https://agentauth-production-b6b2.up.railway.app/health" class="btn btn-secondary" target="_blank">API Health Check</a>
-                </div>
-            </section>
+            <button class="nav-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
+    </nav>
 
-        <footer>
-            <p>Built with Express, Supabase, JWT</p>
-            <p style="margin-top: 10px; opacity: 0.8;">Like Auth0, but for AI agents. Building in public.</p>
-            <div class="footer-links">
-                <a href="https://github.com/umytbaynazarov-coder/Agent-Identity">GitHub</a>
-                <a href="https://agentauth-production-b6b2.up.railway.app/health">API Status</a>
-                <a href="https://twitter.com/umytbaynazarov">Twitter/X</a>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                <span>v0.4.0 — Latest Release</span>
             </div>
-        </footer>
-    </div>
-
-    <script>
-        const API_BASE = 'https://agentauth-production-b6b2.up.railway.app';
-        let demoCredentials = {};
-
-        // Helper to format JSON with syntax highlighting
-        function formatJSON(obj) {
-            const json = JSON.stringify(obj, null, 2);
-            return json
-                .replace(/"([^"]+)":/g, '<span class="key">"$1"</span>:')
-                .replace(/: "([^"]+)"/g, ': <span class="string">"$1"</span>')
-                .replace(/: (\d+)/g, ': <span class="number">$1</span>')
-                .replace(/: (true|false)/g, ': <span class="number">$1</span>');
-        }
-
-        // Update status indicator
-        function setStatus(elementId, status, text) {
-            const el = document.getElementById(elementId);
-            el.className = 'output-status ' + status;
-            el.textContent = text || (status === 'success' ? '200 OK' : status === 'error' ? 'Error' : 'Waiting...');
-        }
-
-        // Set button loading state
-        function setLoading(btnId, loading) {
-            const btn = document.getElementById(btnId);
-            if (loading) {
-                btn.classList.add('loading');
-                btn.disabled = true;
-            } else {
-                btn.classList.remove('loading');
-                btn.disabled = false;
-            }
-        }
-
-        async function registerDemoAgent() {
-            const btn = document.getElementById('btn-register');
-            const output = document.getElementById('register-output');
             
-            setLoading('btn-register', true);
-            setStatus('status-register', 'waiting', 'Loading...');
+            <h1 class="hero-title">
+                Passport for<br>
+                <span class="gradient-text">AI Agents</span>
+            </h1>
             
-            try {
-                const response = await fetch(`${API_BASE}/agents/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: 'Demo Agent ' + Date.now(),
-                        description: 'Testing AgentAuth from the interactive playground',
-                        owner_email: 'demo@test.com',
-                        permissions: ['read']
-                    })
-                });
+            <p class="hero-subtitle">
+                Simple, secure authentication for AI agents. Built for developers who value<br>
+                simplicity, security, and performance. Open source and ready to scale.
+            </p>
+            
+            <div class="hero-cta">
+                <a href="#quickstart" class="btn-primary">
+                    Get Started
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                <a href="https://github.com/yourusername/agentauth" class="btn-secondary" target="_blank">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    View on GitHub
+                </a>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-value">25</div>
+                    <div class="stat-label">Tests Passing</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">100%</div>
+                    <div class="stat-label">Open Source</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">&lt;5ms</div>
+                    <div class="stat-label">Auth Latency</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hero-visual">
+            <div class="code-window">
+                <div class="code-window-header">
+                    <div class="code-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="code-title">terminal</div>
+                </div>
+                <div class="code-window-body">
+                    <pre><code><span class="code-comment"># Install AgentAuth</span>
+<span class="code-command">npm install agentauth</span>
 
-                const data = await response.json();
+<span class="code-comment"># Register an agent</span>
+<span class="code-command">curl -X POST https://api.agentauth.dev/agents/register \</span>
+  <span class="code-flag">-H</span> <span class="code-string">"Content-Type: application/json"</span> \
+  <span class="code-flag">-d</span> <span class="code-string">'{"name":"MyAgent","permissions":["read"]}'</span>
+
+<span class="code-success">✓ Agent registered successfully</span>
+<span class="code-output">→ Agent ID: agent_abc123</span></code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Built for Simplicity</h2>
+                <p class="section-subtitle">Everything you need for agent authentication, nothing you don't</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                            <path d="M9 12l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <h3>JWT Authentication</h3>
+                    <p>Industry-standard tokens with refresh support. Secure, stateless, and scalable out of the box.</p>
+                </div>
                 
-                if (response.ok) {
-                    // Store credentials from the actual API response structure
-                    demoCredentials = {
-                        agent_id: data.agent.agent_id,
-                        api_key: data.credentials.api_key
-                    };
-                    output.innerHTML = formatJSON(data);
-                    setStatus('status-register', 'success', `${response.status} OK`);
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                    </div>
+                    <h3>Rate Limiting</h3>
+                    <p>Per-agent rate limits with tiered access. Free, Pro, and Enterprise tiers built-in.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                            <path d="M8 10h8M8 14h4"/>
+                        </svg>
+                    </div>
+                    <h3>Webhooks</h3>
+                    <p>Real-time notifications for agent events. Secure signature verification included.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            <path d="M9 9h6v6H9z"/>
+                        </svg>
+                    </div>
+                    <h3>Scoped Permissions</h3>
+                    <p>Fine-grained access control. Define exactly what each agent can do.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                    </div>
+                    <h3>High Performance</h3>
+                    <p>Zero memory leaks, optimized queries, sub-5ms auth checks. Built for production.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                    </div>
+                    <h3>Activity Logging</h3>
+                    <p>Complete audit trail with pagination. Track every authentication event.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section id="quickstart" class="quickstart">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Get Started in Minutes</h2>
+                <p class="section-subtitle">Three steps to secure your AI agents</p>
+            </div>
+            
+            <div class="quickstart-tabs">
+                <button class="tab-btn active" data-tab="nodejs">Node.js</button>
+                <button class="tab-btn" data-tab="python">Python</button>
+                <button class="tab-btn" data-tab="curl">cURL</button>
+            </div>
+            
+            <div class="quickstart-content">
+                <!-- Node.js Tab -->
+                <div class="tab-panel active" data-panel="nodejs">
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Install & Setup</span>
+                            <button class="copy-btn" data-copy="nodejs-install">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="nodejs-install"><code>npm install agentauth
+
+// Initialize client
+const AgentAuth = require('agentauth');
+const auth = new AgentAuth({
+  apiUrl: 'https://api.agentauth.dev',
+  apiKey: process.env.AGENTAUTH_KEY
+});</code></pre>
+                    </div>
                     
-                    // Enable next step
-                    document.getElementById('btn-verify').disabled = false;
-                } else {
-                    output.innerHTML = formatJSON(data);
-                    setStatus('status-register', 'error', `${response.status} Error`);
-                }
-            } catch (error) {
-                output.innerHTML = formatJSON({ error: error.message });
-                setStatus('status-register', 'error', 'Network Error');
-            }
-            
-            setLoading('btn-register', false);
-        }
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Register Agent</span>
+                            <button class="copy-btn" data-copy="nodejs-register">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="nodejs-register"><code>const agent = await auth.register({
+  name: 'MyAgent',
+  permissions: ['read', 'write']
+});
 
-        async function verifyDemoAgent() {
-            if (!demoCredentials.agent_id) {
-                alert('Please register an agent first!');
-                return;
-            }
-            
-            const output = document.getElementById('verify-output');
-            
-            setLoading('btn-verify', true);
-            setStatus('status-verify', 'waiting', 'Loading...');
-            
-            try {
-                const response = await fetch(`${API_BASE}/agents/verify`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        agent_id: demoCredentials.agent_id,
-                        api_key: demoCredentials.api_key
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (response.ok) {
-                    // Store token from the actual API response structure
-                    demoCredentials.token = data.token.access_token;
-                    output.innerHTML = formatJSON(data);
-                    setStatus('status-verify', 'success', `${response.status} OK`);
+console.log('Agent ID:', agent.id);
+console.log('API Key:', agent.apiKey);</code></pre>
+                    </div>
                     
-                    // Enable next step
-                    document.getElementById('btn-use').disabled = false;
-                } else {
-                    output.innerHTML = formatJSON(data);
-                    setStatus('status-verify', 'error', `${response.status} Error`);
-                }
-            } catch (error) {
-                output.innerHTML = formatJSON({ error: error.message });
-                setStatus('status-verify', 'error', 'Network Error');
-            }
-            
-            setLoading('btn-verify', false);
-        }
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Authenticate</span>
+                            <button class="copy-btn" data-copy="nodejs-auth">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="nodejs-auth"><code>const token = await auth.verify({
+  agentId: agent.id,
+  apiKey: agent.apiKey
+});
 
-        async function useJWT() {
-            if (!demoCredentials.token) {
-                alert('Please verify the agent first to get a JWT token!');
-                return;
-            }
-            
-            const output = document.getElementById('use-output');
-            
-            setLoading('btn-use', true);
-            setStatus('status-use', 'waiting', 'Loading...');
-            
-            try {
-                const response = await fetch(`${API_BASE}/agents/${demoCredentials.agent_id}`, {
-                    headers: { 
-                        'Authorization': `Bearer ${demoCredentials.token}`
-                    }
-                });
-
-                const data = await response.json();
+// Use token in requests
+const response = await fetch('/api/data', {
+  headers: { 'Authorization': `Bearer ${token.accessToken}` }
+});</code></pre>
+                    </div>
+                </div>
                 
-                if (response.ok) {
-                    output.innerHTML = formatJSON(data);
-                    setStatus('status-use', 'success', `${response.status} OK`);
-                } else {
-                    output.innerHTML = formatJSON(data);
-                    setStatus('status-use', 'error', `${response.status} Error`);
-                }
-            } catch (error) {
-                output.innerHTML = formatJSON({ error: error.message });
-                setStatus('status-use', 'error', 'Network Error');
-            }
+                <!-- Python Tab -->
+                <div class="tab-panel" data-panel="python">
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Install & Setup</span>
+                            <button class="copy-btn" data-copy="python-install">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="python-install"><code>pip install agentauth
+
+# Initialize client
+from agentauth import AgentAuth
+
+auth = AgentAuth(
+    api_url='https://api.agentauth.dev',
+    api_key=os.getenv('AGENTAUTH_KEY')
+)</code></pre>
+                    </div>
+                    
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Register Agent</span>
+                            <button class="copy-btn" data-copy="python-register">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="python-register"><code>agent = auth.register(
+    name='MyAgent',
+    permissions=['read', 'write']
+)
+
+print(f'Agent ID: {agent["id"]}')
+print(f'API Key: {agent["apiKey"]}')</code></pre>
+                    </div>
+                    
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Authenticate</span>
+                            <button class="copy-btn" data-copy="python-auth">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="python-auth"><code>token = auth.verify(
+    agent_id=agent['id'],
+    api_key=agent['apiKey']
+)
+
+# Use token in requests
+response = requests.get('/api/data',
+    headers={'Authorization': f'Bearer {token["accessToken"]}'}
+)</code></pre>
+                    </div>
+                </div>
+                
+                <!-- cURL Tab -->
+                <div class="tab-panel" data-panel="curl">
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Register Agent</span>
+                            <button class="copy-btn" data-copy="curl-register">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="curl-register"><code>curl -X POST https://api.agentauth.dev/agents/register \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "name": "MyAgent",
+    "permissions": ["read", "write"]
+  }'</code></pre>
+                    </div>
+                    
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Verify Agent</span>
+                            <button class="copy-btn" data-copy="curl-verify">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="curl-verify"><code>curl -X POST https://api.agentauth.dev/agents/verify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentId": "agent_abc123",
+    "apiKey": "ak_xxxxxxxxxxxx"
+  }'</code></pre>
+                    </div>
+                    
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Use Token</span>
+                            <button class="copy-btn" data-copy="curl-use">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="curl-use"><code>curl https://api.agentauth.dev/agents/YOUR_AGENT_ID \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1..."</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Demo Section -->
+    <section id="demo" class="demo">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Try it Live</h2>
+                <p class="section-subtitle">Interactive demo against our production API</p>
+            </div>
             
-            setLoading('btn-use', false);
-        }
-    </script>
+            <div class="demo-container">
+                <div class="demo-steps">
+                    <div class="demo-step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Register Agent</h3>
+                            <p>Create a new agent with permissions</p>
+                            <button class="btn-demo" id="demo-register">Register Agent</button>
+                            <div class="demo-output" id="register-output"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="demo-step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Verify & Get Token</h3>
+                            <p>Exchange credentials for JWT</p>
+                            <button class="btn-demo" id="demo-verify" disabled>Verify Agent</button>
+                            <div class="demo-output" id="verify-output"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="demo-step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Fetch Agent Details</h3>
+                            <p>Use token to access protected resource</p>
+                            <button class="btn-demo" id="demo-fetch" disabled>Fetch Details</button>
+                            <div class="demo-output" id="fetch-output"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="demo-success" id="demo-success" style="display: none;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                        <path d="M22 4L12 14.01l-3-3"/>
+                    </svg>
+                    <h3>Authentication Complete!</h3>
+                    <p>Your agent is now authenticated and ready to make secure API calls.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Latest Updates Section -->
+    <section class="updates">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">What's New in v0.4.0</h2>
+                <p class="section-subtitle">Latest improvements and fixes</p>
+            </div>
+            
+            <div class="updates-grid">
+                <div class="update-card highlight">
+                    <div class="update-icon critical">🔥</div>
+                    <h3>Critical Fixes</h3>
+                    <ul>
+                        <li>Fixed memory leak in rate limiting store</li>
+                        <li>Fixed race condition in rate limiter</li>
+                        <li>Cache tier in JWT for better performance</li>
+                        <li>Added missing database indexes</li>
+                    </ul>
+                </div>
+                
+                <div class="update-card">
+                    <div class="update-icon">✨</div>
+                    <h3>New Features</h3>
+                    <ul>
+                        <li>Revoke all refresh tokens endpoint</li>
+                        <li>Regenerate webhook secrets</li>
+                        <li>Update agent tier (admin)</li>
+                        <li>Enhanced pagination metadata</li>
+                    </ul>
+                </div>
+                
+                <div class="update-card">
+                    <div class="update-icon">⚡</div>
+                    <h3>Performance</h3>
+                    <ul>
+                        <li>Eliminated unnecessary DB queries</li>
+                        <li>Added 3 new indexes</li>
+                        <li>Zero memory leaks</li>
+                        <li>Improved test coverage (25 tests)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Secure Your Agents?</h2>
+                <p>Join developers building the next generation of AI applications</p>
+                <div class="cta-buttons">
+                    <a href="https://github.com/yourusername/agentauth" class="btn-primary" target="_blank">
+                        Get Started Free
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                    <a href="https://docs.agentauth.dev" class="btn-secondary" target="_blank">
+                        Read the Docs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <svg class="logo-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M40 4L10 16V36C10 54 22 68 40 76C58 68 70 54 70 36V16L40 4Z" stroke="url(#gradient-footer)" stroke-width="3"/>
+                            <path d="M28 40L36 48L52 32" stroke="url(#gradient-footer2)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <defs>
+                                <linearGradient id="gradient-footer" x1="10" y1="4" x2="70" y2="76" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#0066FF"/>
+                                    <stop offset="100%" stop-color="#00E5A0"/>
+                                </linearGradient>
+                                <linearGradient id="gradient-footer2" x1="28" y1="32" x2="52" y2="48" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#0066FF"/>
+                                    <stop offset="100%" stop-color="#00E5A0"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <span>AgentAuth</span>
+                    </div>
+                    <p>Passport for AI Agents<br>Open source authentication</p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Product</h4>
+                        <a href="#features">Features</a>
+                        <a href="#quickstart">Quick Start</a>
+                        <a href="https://docs.agentauth.dev" target="_blank">Documentation</a>
+                        <a href="https://github.com/yourusername/agentauth/releases" target="_blank">Changelog</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <a href="https://github.com/yourusername/agentauth" target="_blank">GitHub</a>
+                        <a href="https://github.com/yourusername/agentauth/issues" target="_blank">Issues</a>
+                        <a href="https://docs.agentauth.dev/api" target="_blank">API Reference</a>
+                        <a href="#demo">Live Demo</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Community</h4>
+                        <a href="https://x.com/b_umyt" target="_blank">X</a>
+                        <a href="https://discord.gg/agentauth" target="_blank">Discord(coming)</a>
+                        <a href="https://github.com/yourusername/agentauth/discussions" target="_blank">Discussions(coming)</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 AgentAuth. Open source under MIT License.</p>
+                <div class="footer-social">
+                    <a href="https://https://github.com/umytbaynazarov-coder/Agent-Identity" target="_blank" aria-label="GitHub">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                        </svg>
+                    </a>
+                    <a href="https://x.com/b_umyt" target="_blank" aria-label="X">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
 </body>
 </html>

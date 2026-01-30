@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentAuth - Visual Identity System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #0066FF;
+            --primary-dark: #0052CC;
+            --primary-light: #3385FF;
+            --secondary: #00E5A0;
+            --accent: #FF3D71;
+            --dark: #0A0E27;
+            --dark-surface: #141829;
+            --gray: #8B92B0;
+            --light-gray: #E5E7EB;
+            --white: #FFFFFF;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--dark);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+        
+        .hero {
+            text-align: center;
+            margin-bottom: 120px;
+            position: relative;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 102, 255, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .hero h1 {
+            font-size: 72px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: 24px;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            margin-bottom: 120px;
+        }
+        
+        .section-title {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--white);
+        }
+        
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--gray);
+            margin-bottom: 60px;
+        }
+        
+        /* Logo Variations */
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        
+        .logo-card {
+            background: var(--dark-surface);
+            border: 2px solid rgba(139, 146, 176, 0.1);
+            border-radius: 24px;
+            padding: 60px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .logo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.05) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .logo-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+        
+        .logo-card:hover::before {
+            opacity: 1;
+        }
+        
+        .logo-card h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--white);
+        }
+        
+        .logo-card p {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 40px;
+        }
+        
+        /* Primary Logo */
+        .logo-primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+        
+        .logo-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .logo-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 42px;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: -0.02em;
+        }
+        
+        /* Color Palette */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+        
+        .color-card {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(139, 146, 176, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .color-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+        
+        .color-swatch {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .color-info {
+            background: var(--dark-surface);
+            padding: 20px;
+        }
+        
+        .color-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--white);
+        }
+        
+        .color-values {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--gray);
+        }
+        
+        .color-value {
+            margin-bottom: 4px;
+        }
+        
+        /* Typography */
+        .type-specimen {
+            background: var(--dark-surface);
+            border: 2px solid rgba(139, 146, 176, 0.1);
+            border-radius: 24px;
+            padding: 60px;
+            margin-bottom: 40px;
+        }
+        
+        .type-display {
+            margin-bottom: 40px;
+        }
+        
+        .type-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gray);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        
+        .type-heading {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .type-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .type-h1 {
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+        
+        .type-h2 {
+            font-size: 48px;
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        .type-h3 {
+            font-size: 32px;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 20px;
+        }
+        
+        .type-body {
+            font-size: 18px;
+            line-height: 1.7;
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+        
+        .type-code {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--secondary);
+        }
+        
+        /* Brand Guidelines */
+        .guidelines-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+        }
+        
+        .guideline-card {
+            background: var(--dark-surface);
+            border: 2px solid rgba(139, 146, 176, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+        
+        .guideline-card:hover {
+            border-color: var(--primary);
+        }
+        
+        .guideline-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 24px;
+        }
+        
+        .guideline-card h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: var(--white);
+        }
+        
+        .guideline-card p {
+            color: var(--gray);
+            line-height: 1.7;
+        }
+        
+        /* Usage Examples */
+        .usage-example {
+            background: var(--dark-surface);
+            border: 2px solid rgba(139, 146, 176, 0.1);
+            border-radius: 24px;
+            padding: 60px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .example-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gray);
+            margin-bottom: 32px;
+            font-weight: 600;
+        }
+        
+        /* Download Section */
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+        
+        .download-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .download-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 102, 255, 0.3);
+        }
+        
+        .download-card h4 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--white);
+        }
+        
+        .download-card p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+        
+        .download-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: var(--white);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .logo-white-bg {
+            background: var(--white);
+        }
+        
+        .logo-dark-bg {
+            background: var(--dark);
+        }
+        
+        .logo-gradient-bg {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        /* Icon variations */
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-top: 40px;
+        }
+        
+        .icon-card {
+            background: var(--dark-surface);
+            border: 2px solid rgba(139, 146, 176, 0.1);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .icon-card:hover {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+        
+        .icon-card svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+        }
+        
+        .icon-label {
+            font-size: 12px;
+            color: var(--gray);
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero -->
+        <div class="hero">
+            <h1>AgentAuth</h1>
+            <p>Visual Identity System v1.0 — Passport for AI Agents</p>
+        </div>
+        
+        <!-- Logo Section -->
+        <section class="section">
+            <h2 class="section-title">Logo System</h2>
+            <p class="section-subtitle">Bold, technical, memorable — designed for developer-first simplicity</p>
+            
+            <div class="logo-grid">
+                <!-- Primary Logo -->
+                <div class="logo-card">
+                    <h3>Primary Logo</h3>
+                    <p>Full horizontal lockup</p>
+                    <div class="logo-primary">
+                        <div class="logo-icon">
+                            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Shield base -->
+                                <path d="M40 4L10 16V36C10 54 22 68 40 76C58 68 70 54 70 36V16L40 4Z" 
+                                      stroke="url(#gradient1)" stroke-width="3" fill="none"/>
+                                
+                                <!-- Checkmark/verified symbol -->
+                                <path d="M28 40L36 48L52 32" 
+                                      stroke="url(#gradient2)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                                
+                                <!-- Inner circuit lines -->
+                                <circle cx="40" cy="40" r="18" stroke="url(#gradient3)" stroke-width="1.5" opacity="0.3"/>
+                                <circle cx="40" cy="40" r="12" stroke="url(#gradient3)" stroke-width="1.5" opacity="0.2"/>
+                                
+                                <defs>
+                                    <linearGradient id="gradient1" x1="10" y1="4" x2="70" y2="76" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0%" stop-color="#0066FF"/>
+                                        <stop offset="100%" stop-color="#00E5A0"/>
+                                    </linearGradient>
+                                    <linearGradient id="gradient2" x1="28" y1="32" x2="52" y2="48" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0%" stop-color="#0066FF"/>
+                                        <stop offset="100%" stop-color="#00E5A0"/>
+                                    </linearGradient>
+                                    <linearGradient id="gradient3" x1="22" y1="22" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0%" stop-color="#0066FF"/>
+                                        <stop offset="100%" stop-color="#00E5A0"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <span class="logo-text">AgentAuth</span>
+                    </div>
+                </div>
+                
+                <!-- Icon Only -->
+                <div class="logo-card">
+                    <h3>Icon Mark</h3>
+                    <p>App icons & social profiles</p>
+                    <div style="padding: 20px;">
+                        <svg width="120" height="120" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M40 4L10 16V36C10 54 22 68 40 76C58 68 70 54 70 36V16L40 4Z" 
+                                  stroke="url(#gradient1)" stroke-width="3" fill="none"/>
+                            <path d="M28 40L36 48L52 32" 
+                                  stroke="url(#gradient2)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="40" cy="40" r="18" stroke="url(#gradient3)" stroke-width="1.5" opacity="0.3"/>
+                            <circle cx="40" cy="40" r="12" stroke="url(#gradient3)" stroke-width="1.5" opacity="0.2"/>
+                            <defs>
+                                <linearGradient id="gradient1" x1="10" y1="4" x2="70" y2="76" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#0066FF"/>
+                                    <stop offset="100%" stop-color="#00E5A0"/>
+                                </linearGradient>
+                                <linearGradient id="gradient2" x1="28" y1="32" x2="52" y2="48" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#0066FF"/>
+                                    <stop offset="100%" stop-color="#00E5A0"/>
+                                </linearGradient>
+                                <linearGradient id="gradient3" x1="22" y1="22" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#0066FF"/>
+                                    <stop offset="100%" stop-color="#00E5A0"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- Wordmark -->
+                <div class="logo-card">
+                    <h3>Wordmark</h3>
+                    <p>Text-only version</p>
+                    <div style="padding: 40px 20px;">
+                        <div class="logo-text" style="font-size: 48px;">AgentAuth</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Logo Usage Examples -->
+            <div class="icon-grid">
+                <div class="icon-card logo-dark-bg">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M40 4L10 16V36C10 54 22 68 40 76C58 68 70 54 70 36V16L40 4Z" 
+                              stroke="url(#g1)" stroke-width="3"/>
+                        <path d="M28 40L36 48L52 32" stroke="url(#g2)" stroke-width="4" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="g1" x1="10" y1="4" x2="70" y2="76">
+                                <stop offset="0%" stop-color="#0066FF"/>
+                                <stop offset="100%" stop-color="#00E5A0"/>
+                            </linearGradient>
+                            <linearGradient id="g2" x1="28" y1="32" x2="52" y2="48">
+                                <stop offset="0%" stop-color="#0066FF"/>
+                                <stop offset="100%" stop-color="#00E5A0"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="icon-label">Dark BG</div>
+                </div>
+                
+                <div class="icon-card logo-white-bg">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M40 4L10 16V36C10 54 22 68 40 76C58 68 70 54 70 36V16L40 4Z" 
+                              stroke="url(#g3)" stroke-width="3"/>
+                        <path d="M28 40L36 48L52 32" stroke="url(#g4)" stroke-width="4" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="g3" x1="10" y1="4" x2="70" y2="76">
+                                <stop offset="0%" stop-color="#0066FF"/>
+                                <stop offset="100%" stop-color="#00E5A0"/>
+                            </linearGradient>
+                            <linearGradient id="g4" x1="28" y1="32" x2="52" y2="48">
+                                <stop offset="0%" stop-color="#0066FF"/>
+                                <stop offset="100%" stop-color="#00E5A0"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="icon-label" style="color: #0A0E27;">Light BG</div>
+                </div>
+                
+                <div class="icon-card logo-gradient-bg">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M40 4L10 16V36C10 54 22 68 40 76C58 68 70 54 70 36V16L40 4Z" 
+                              stroke="white" stroke-width="3"/>
+                        <path d="M28 40L36 48L52 32" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                    <div class="icon-label">Gradient BG</div>
+                </div>
+                
+                <div class="icon-card" style="border: 2px solid #0066FF;">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M40 4L10 16V36C10 54 22 68 40 76C58 68 70 54 70 36V16L40 4Z" 
+                              fill="url(#g5)" stroke="none"/>
+                        <path d="M28 40L36 48L52 32" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="g5" x1="10" y1="4" x2="70" y2="76">
+                                <stop offset="0%" stop-color="#0066FF"/>
+                                <stop offset="100%" stop-color="#00E5A0"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="icon-label">Solid Fill</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Color Palette -->
+        <section class="section">
+            <h2 class="section-title">Color System</h2>
+            <p class="section-subtitle">Bold, authoritative colors inspired by security and trust</p>
+            
+            <div class="color-grid">
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #0066FF;">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="white">
+                            <path d="M24 4L8 10v12c0 10 6.67 19.33 16 24 9.33-4.67 16-14 16-24V10L24 4z"/>
+                        </svg>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Primary Blue</div>
+                        <div class="color-values">
+                            <div class="color-value">HEX: #0066FF</div>
+                            <div class="color-value">RGB: 0, 102, 255</div>
+                            <div class="color-value">HSL: 216, 100%, 50%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #00E5A0;">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="white">
+                            <path d="M18 24l6 6 12-12" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Success Green</div>
+                        <div class="color-values">
+                            <div class="color-value">HEX: #00E5A0</div>
+                            <div class="color-value">RGB: 0, 229, 160</div>
+                            <div class="color-value">HSL: 162, 100%, 45%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #FF3D71;">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="white">
+                            <circle cx="24" cy="24" r="3"/>
+                            <circle cx="24" cy="14" r="2"/>
+                        </svg>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Accent Red</div>
+                        <div class="color-values">
+                            <div class="color-value">HEX: #FF3D71</div>
+                            <div class="color-value">RGB: 255, 61, 113</div>
+                            <div class="color-value">HSL: 344, 100%, 62%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #0A0E27;">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="white">
+                            <rect x="12" y="12" width="24" height="24" rx="4"/>
+                        </svg>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Dark Base</div>
+                        <div class="color-values">
+                            <div class="color-value">HEX: #0A0E27</div>
+                            <div class="color-value">RGB: 10, 14, 39</div>
+                            <div class="color-value">HSL: 232, 59%, 10%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #141829;">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="white">
+                            <rect x="12" y="12" width="24" height="24" rx="4" fill="none" stroke="white" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Surface Dark</div>
+                        <div class="color-values">
+                            <div class="color-value">HEX: #141829</div>
+                            <div class="color-value">RGB: 20, 24, 41</div>
+                            <div class="color-value">HSL: 229, 34%, 12%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #8B92B0;">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="white">
+                            <text x="24" y="30" text-anchor="middle" font-size="24" font-weight="600">Aa</text>
+                        </svg>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Gray Text</div>
+                        <div class="color-values">
+                            <div class="color-value">HEX: #8B92B0</div>
+                            <div class="color-value">RGB: 139, 146, 176</div>
+                            <div class="color-value">HSL: 229, 19%, 62%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Typography -->
+        <section class="section">
+            <h2 class="section-title">Typography</h2>
+            <p class="section-subtitle">Developer-focused fonts that balance personality with readability</p>
+            
+            <div class="type-specimen">
+                <div class="type-display">
+                    <div class="type-label">Display / Headings — Space Grotesk Bold</div>
+                    <div class="type-h1 type-heading">Authenticate AI Agents</div>
+                    <div class="type-h2 type-heading">Simple, Secure, Fast</div>
+                    <div class="type-h3 type-heading">Built for Developers</div>
+                </div>
+                
+                <div class="type-display">
+                    <div class="type-label">Body Text — Space Grotesk Regular</div>
+                    <div class="type-body">
+                        AgentAuth provides a simple, secure authentication system for AI agents. 
+                        Built with developer experience in mind, it offers JWT-based auth, refresh tokens, 
+                        per-agent rate limiting, and comprehensive webhook support.
+                    </div>
+                </div>
+                
+                <div class="type-display">
+                    <div class="type-label">Code / Monospace — JetBrains Mono</div>
+                    <div class="type-code type-mono">
+                        npm install agentauth<br>
+                        POST /agents/register<br>
+                        Authorization: Bearer eyJhbGci...
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Brand Guidelines -->
+        <section class="section">
+            <h2 class="section-title">Brand Principles</h2>
+            <p class="section-subtitle">Core values that guide every design decision</p>
+            
+            <div class="guidelines-grid">
+                <div class="guideline-card">
+                    <div class="guideline-icon">⚡</div>
+                    <h3>Simplicity First</h3>
+                    <p>Every element serves a purpose. No unnecessary complexity. Clear, direct communication that developers appreciate.</p>
+                </div>
+                
+                <div class="guideline-card">
+                    <div class="guideline-icon">🛡️</div>
+                    <h3>Security Visible</h3>
+                    <p>Trust through transparency. The shield symbolizes protection. Bold colors convey confidence and reliability.</p>
+                </div>
+                
+                <div class="guideline-card">
+                    <div class="guideline-icon">⚡</div>
+                    <h3>Performance Matters</h3>
+                    <p>Fast, efficient, optimized. Our branding reflects the speed and performance of the product itself.</p>
+                </div>
+                
+                <div class="guideline-card">
+                    <div class="guideline-icon">👨‍💻</div>
+                    <h3>Developer-First</h3>
+                    <p>Speak the language of code. Monospace fonts, terminal aesthetics, and technical precision in every detail.</p>
+                </div>
+                
+                <div class="guideline-card">
+                    <div class="guideline-icon">🌐</div>
+                    <h3>Open Source Spirit</h3>
+                    <p>Transparent, accessible, community-driven. Our brand celebrates collaboration and openness.</p>
+                </div>
+                
+                <div class="guideline-card">
+                    <div class="guideline-icon">🚀</div>
+                    <h3>Bold & Modern</h3>
+                    <p>Not afraid to stand out. Vibrant gradients, strong contrasts, and contemporary design patterns.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Usage Examples -->
+        <section class="section">
+            <h2 class="section-title">Real-World Applications</h2>
+            <p class="section-subtitle">How the brand comes to life across different touchpoints</p>
+            
+            <div class="usage-example">
+                <div class="example-label">GitHub Repository Header</div>
+                <div style="background: white; padding: 60px; border-radius: 16px; display: inline-block;">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <svg width="60" height="60" viewBox="0 0 80 80" fill="none">
+                            <path d="M40 4L10 16V36C10 54 22 68 40 76C58 68 70 54 70 36V16L40 4Z" 
+                                  stroke="url(#gh1)" stroke-width="3"/>
+                            <path d="M28 40L36 48L52 32" stroke="url(#gh2)" stroke-width="4" stroke-linecap="round"/>
+                            <defs>
+                                <linearGradient id="gh1" x1="10" y1="4" x2="70" y2="76">
+                                    <stop offset="0%" stop-color="#0066FF"/>
+                                    <stop offset="100%" stop-color="#00E5A0"/>
+                                </linearGradient>
+                                <linearGradient id="gh2" x1="28" y1="32" x2="52" y2="48">
+                                    <stop offset="0%" stop-color="#0066FF"/>
+                                    <stop offset="100%" stop-color="#00E5A0"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div style="text-align: left;">
+                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; color: #0A0E27; margin-bottom: 4px;">
+                                AgentAuth
+                            </div>
+                            <div style="font-size: 16px; color: #8B92B0;">
+                                🛡️ Passport for AI Agents — Simple, Secure, Open Source
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="usage-example">
+                <div class="example-label">Terminal Install Command</div>
+                <div style="background: #0A0E27; padding: 40px; border-radius: 12px; font-family: 'JetBrains Mono', monospace; text-align: left; max-width: 600px; margin: 0 auto; border: 2px solid rgba(0, 102, 255, 0.3);">
+                    <div style="color: #8B92B0; margin-bottom: 16px;">$ npm install agentauth</div>
+                    <div style="color: #00E5A0;">✓ Successfully installed agentauth@0.4.0</div>
+                    <div style="color: #0066FF; margin-top: 8px;">→ Documentation: docs.agentauth.dev</div>
+                </div>
+            </div>
+            
+            <div class="usage-example" style="background: white;">
+                <div class="example-label" style="color: #0A0E27;">Documentation Badge</div>
+                <div style="display: inline-flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #0066FF 0%, #00E5A0 100%); padding: 12px 24px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: white;">
+                    <svg width="24" height="24" viewBox="0 0 80 80" fill="white">
+                        <path d="M40 4L10 16V36C10 54 22 68 40 76C58 68 70 54 70 36V16L40 4Z"/>
+                        <path d="M28 40L36 48L52 32" stroke="#0A0E27" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                    <span>AUTHENTICATED</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Download Resources -->
+        <section class="section">
+            <h2 class="section-title">Brand Assets</h2>
+            <p class="section-subtitle">Download logo files and brand resources</p>
+            
+            <div class="download-grid">
+                <div class="download-card">
+                    <h4>Logo Package</h4>
+                    <p>SVG, PNG, PDF formats</p>
+                    <button class="download-btn">Download ZIP</button>
+                </div>
+                
+                <div class="download-card" style="background: linear-gradient(135deg, #00E5A0 0%, #0066FF 100%);">
+                    <h4>Color Palette</h4>
+                    <p>Figma, Sketch, Adobe</p>
+                    <button class="download-btn">Download</button>
+                </div>
+                
+                <div class="download-card" style="background: linear-gradient(135deg, #FF3D71 0%, #0066FF 100%);">
+                    <h4>Brand Guidelines</h4>
+                    <p>Complete PDF guide</p>
+                    <button class="download-btn">Download PDF</button>
+                </div>
+                
+                <div class="download-card" style="background: linear-gradient(135deg, #0066FF 0%, #0A0E27 100%);">
+                    <h4>Typography</h4>
+                    <p>Font files & usage guide</p>
+                    <button class="download-btn">Download</button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Brand Story -->
+        <section class="section">
+            <div class="type-specimen" style="text-align: center;">
+                <div class="type-label">Brand Narrative</div>
+                <div class="type-h2 type-heading" style="margin-bottom: 32px; background: linear-gradient(135deg, #0066FF 0%, #00E5A0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    Every AI Agent Deserves an Identity
+                </div>
+                <div class="type-body" style="max-width: 800px; margin: 0 auto; font-size: 20px;">
+                    In a world where AI agents are becoming the new workforce, authentication can't be an afterthought. 
+                    AgentAuth is the developer's answer to agent security — simple enough to implement in minutes, 
+                    robust enough to scale to millions of agents. We believe great security should feel invisible, 
+                    and powerful tools should be ridiculously easy to use.
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        // Add subtle animation on scroll
+        const cards = document.querySelectorAll('.logo-card, .color-card, .guideline-card, .icon-card');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
