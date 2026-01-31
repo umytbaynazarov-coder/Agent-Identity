@@ -34,6 +34,7 @@
             <div class="nav-links">
                 <a href="#features">Features</a>
                 <a href="#quickstart">Quick Start</a>
+                <a href="#playground">Playground</a>
                 <a href="#demo">Demo</a>
                 <a href="https://github.com/yourusername/agentauth" target="_blank" class="nav-link-github">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -449,6 +450,105 @@ response = requests.get('/api/data',
                     <h3>Authentication Complete!</h3>
                     <p>Your agent is now authenticated and ready to make secure API calls.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Playground Section -->
+    <section id="playground" class="playground">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Try AgentAuth in Your Browser</h2>
+                <p class="section-subtitle">Interactive playgrounds - no installation required</p>
+            </div>
+
+            <div class="playground-grid">
+                <!-- TypeScript Playground -->
+                <div class="playground-card">
+                    <div class="playground-header">
+                        <h3>TypeScript / Node.js</h3>
+                        <a href="https://stackblitz.com/github/umytbaynazarov-coder/agentauth-typescript-starter"
+                           target="_blank"
+                           class="playground-link">
+                            Open in StackBlitz →
+                        </a>
+                    </div>
+                    <div class="playground-description">
+                        <p>Try the TypeScript SDK with full auto-complete and type safety. Perfect for Express, Next.js, and Node.js apps.</p>
+                        <div class="playground-features">
+                            <span class="feature-tag">✨ Auto-complete</span>
+                            <span class="feature-tag">🔒 Type-safe</span>
+                            <span class="feature-tag">⚡ Live demo</span>
+                        </div>
+                    </div>
+                    <div class="code-preview">
+                        <pre><code>import { AgentAuthClient, Permissions } from '@umytbaynazarow/agentauth-sdk';
+
+const client = new AgentAuthClient({
+  baseURL: 'https://agentauth.dev'
+});
+
+const { agent, credentials } = await client.registerAgent({
+  name: 'Demo Agent',
+  permissions: [
+    Permissions.Zendesk.Tickets.Read,  // Auto-complete!
+    Permissions.Slack.Messages.Write,
+  ]
+});</code></pre>
+                    </div>
+                </div>
+
+                <!-- Python Playground -->
+                <div class="playground-card">
+                    <div class="playground-header">
+                        <h3>Python / FastAPI</h3>
+                        <a href="https://colab.research.google.com/github/umytbaynazarov-coder/agentauth-python-starter/blob/main/agentauth_demo.ipynb"
+                           target="_blank"
+                           class="playground-link">
+                            Open in Google Colab →
+                        </a>
+                    </div>
+                    <div class="playground-description">
+                        <p>Try the Python SDK in Google Colab with zero setup. Includes async/await, context managers, and full type hints.</p>
+                        <div class="playground-features">
+                            <span class="feature-tag">🐍 Async/await</span>
+                            <span class="feature-tag">📓 Jupyter Notebook</span>
+                            <span class="feature-tag">⚡ No setup required</span>
+                        </div>
+                    </div>
+                    <div class="code-preview">
+                        <pre><code>from agentauth_sdk import AgentAuthClient, Permissions
+
+async with AgentAuthClient(base_url='https://agentauth-production-b6b2.up.railway.app') as client:
+    result = await client.register_agent(
+        name='Demo Agent',
+        permissions=[
+            Permissions.Zendesk.Tickets.Read,
+            Permissions.Slack.Messages.Write,
+        ]
+    )</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentation Links -->
+            <div class="docs-links">
+                <a href="docs/getting-started/typescript.html" class="doc-link">
+                    <span class="doc-icon">📘</span>
+                    <span>TypeScript Guide</span>
+                </a>
+                <a href="docs/getting-started/python.html" class="doc-link">
+                    <span class="doc-icon">📗</span>
+                    <span>Python Guide</span>
+                </a>
+                <a href="docs/getting-started/cli.html" class="doc-link">
+                    <span class="doc-icon">📙</span>
+                    <span>CLI Guide</span>
+                </a>
+                <a href="docs/index.html" class="doc-link primary">
+                    <span class="doc-icon">📚</span>
+                    <span>Full Documentation</span>
+                </a>
             </div>
         </div>
     </section>

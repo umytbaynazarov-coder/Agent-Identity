@@ -1,0 +1,55 @@
+{
+  "name": "@umytbaynazarow/agentauth-sdk",
+  "version": "0.1.0",
+  "description": "Lightweight, type-safe SDK for AgentAuth - Authentication for AI Agents",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "prepublishOnly": "npm run build",
+    "size": "bundlesize"
+  },
+  "keywords": [
+    "authentication",
+    "auth",
+    "ai-agents",
+    "jwt",
+    "api-key",
+    "typescript",
+    "self-hosted"
+  ],
+  "author": "umytbaynazarov-coder",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/umytbaynazarov-coder/Agent-Identity"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "bundlesize": "^0.18.1"
+  },
+  "bundlesize": [
+    {
+      "path": "./dist/index.mjs",
+      "maxSize": "10 KB"
+    }
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

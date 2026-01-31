@@ -1,0 +1,13 @@
+# Source files (compiled version in dist/)
+src/
+
+# TypeScript config
+tsconfig.json
+
+# Development files
+*.log
+.DS_Store
+
+# Test files
+*.test.ts
+*.spec.ts

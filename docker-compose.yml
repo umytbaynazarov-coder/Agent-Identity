@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # AgentAuth API Backend
+  agentauth-api:
+    build:
+      context: ./agentauth
+      dockerfile: Dockerfile
+    container_name: agentauth-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_ORIGINS=http://localhost:5173,http://localhost:8080,https://dashboard.agentauth.com
+    networks:
+      - agentauth-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # AgentAuth Dashboard (React Frontend)
+  agentauth-dashboard:
+    build:
+      context: ./agentauth-dashboard
+      dockerfile: Dockerfile
+    container_name: agentauth-dashboard
+    ports:
+      - "8080:80"
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:3000}
+    depends_on:
+      - agentauth-api
+    networks:
+      - agentauth-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  agentauth-network:
+    driver: bridge

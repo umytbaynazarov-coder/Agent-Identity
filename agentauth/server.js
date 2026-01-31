@@ -32,8 +32,11 @@ const allowedOrigins = ['https://agentauths.com', 'https://www.agentauths.com'];
 if (process.env.NODE_ENV !== 'production') {
   allowedOrigins.push(
     'http://localhost:3000',
+    'http://localhost:5173', // Vite dashboard dev server
     'http://localhost:5500',
-    'http://127.0.0.1:5500'
+    'http://localhost:8080', // Dashboard Docker container
+    'http://127.0.0.1:5500',
+    'http://127.0.0.1:5173'
   );
 }
 
@@ -1089,6 +1092,157 @@ app.put('/agents/:id/tier', authenticateToken, async (req, res) => {
     });
   } catch (err) {
     console.error('Update tier error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ============================================
+// GET /activity
+// Get global activity feed across all agents (requires admin permission)
+// ============================================
+app.get('/activity', authenticateToken, async (req, res) => {
+  try {
+    // Check admin permission
+    if (!hasPermission(req.agent.permissions, '*:*:*')) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Admin permission (*:*:*) required to view global activity'
+      });
+    }
+
+    const { limit = 100, offset = 0 } = req.query;
+
+    // Fetch total count first
+    const { count: totalCount, error: countError } = await supabase
+      .from('verification_logs')
+      .select('*', { count: 'exact', head: true });
+
+    if (countError) {
+      console.error('Database error:', countError);
+      return res.status(500).json({ error: 'Failed to fetch activity logs' });
+    }
+
+    // Fetch activity logs across all agents with agent info
+    const { data: logs, error } = await supabase
+      .from('verification_logs')
+      .select(`
+        id,
+        agent_id,
+        success,
+        reason,
+        timestamp,
+        ip_address,
+        agents!inner (
+          name,
+          agent_id
+        )
+      `)
+      .order('timestamp', { ascending: false })
+      .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
+
+    if (error) {
+      console.error('Database error:', error);
+      return res.status(500).json({ error: 'Failed to fetch activity logs' });
+    }
+
+    // Transform the data to flatten the agent info
+    const transformedLogs = logs.map(log => ({
+      id: log.id,
+      agent_id: log.agent_id,
+      agent_name: log.agents?.name || 'Unknown',
+      success: log.success,
+      reason: log.reason,
+      timestamp: log.timestamp,
+      ip_address: log.ip_address
+    }));
+
+    const offsetNum = parseInt(offset);
+    const limitNum = parseInt(limit);
+    const total = totalCount || 0;
+
+    res.json({
+      activity: transformedLogs,
+      pagination: {
+        offset: offsetNum,
+        limit: limitNum,
+        count: transformedLogs.length,
+        total: total,
+        has_more: offsetNum + transformedLogs.length < total
+      }
+    });
+
+  } catch (err) {
+    console.error('Get global activity error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ============================================
+// PUT /agents/:id/permissions
+// Update agent permissions (requires admin permission)
+// ============================================
+app.put('/agents/:id/permissions', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { permissions } = req.body;
+
+    // Check admin permission
+    if (!hasPermission(req.agent.permissions, '*:*:*')) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Admin permission (*:*:*) required to update permissions'
+      });
+    }
+
+    // Validate permissions array
+    if (!Array.isArray(permissions)) {
+      return res.status(400).json({
+        error: 'Invalid permissions',
+        message: 'Permissions must be an array'
+      });
+    }
+
+    // Validate each permission
+    const permissionErrors = validatePermissions(permissions);
+    if (permissionErrors.length > 0) {
+      return res.status(400).json({
+        error: 'Invalid permissions',
+        message: 'Some permissions are invalid',
+        invalid_permissions: permissionErrors
+      });
+    }
+
+    // Limit number of permissions
+    if (permissions.length > 50) {
+      return res.status(400).json({
+        error: 'Too many permissions',
+        message: 'Maximum 50 permissions allowed per agent'
+      });
+    }
+
+    // Update agent permissions
+    const { data, error } = await supabase
+      .from('agents')
+      .update({ permissions })
+      .eq('agent_id', id)
+      .select('agent_id, name, permissions, status')
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Agent not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Permissions updated successfully',
+      agent: data
+    });
+
+  } catch (err) {
+    console.error('Update permissions error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
