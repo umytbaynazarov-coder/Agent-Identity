@@ -117,7 +117,7 @@ export function calculateRateLimitStats(logs: VerificationLog[]): TierStats[] {
 
   const tierCounts = new Map<string, number>();
 
-  rateLimitLogs.forEach((log) => {
+  rateLimitLogs.forEach((_log) => {
     // You'd need to get the agent's tier from somewhere
     // For now, we'll assume it's in the log or we need to join with agents
     const tier = 'free'; // placeholder

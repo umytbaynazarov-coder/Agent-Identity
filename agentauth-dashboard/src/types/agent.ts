@@ -9,12 +9,14 @@ export interface Agent {
   tier: 'free' | 'pro' | 'enterprise';
   created_at: string;
   last_verified_at?: string;
+  webhook_count?: number;
   metadata?: Record<string, any>;
 }
 
 export interface VerificationLog {
   id: number;
   agent_id: string;
+  agent_name?: string;
   success: boolean;
   reason?: string;
   timestamp: string;

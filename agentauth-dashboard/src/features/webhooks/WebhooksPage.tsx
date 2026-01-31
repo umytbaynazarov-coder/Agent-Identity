@@ -8,6 +8,7 @@ import {
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import { webhooksApi } from '../../api/webhooks';
+import type { WebhookEvent } from '../../types/webhook';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
@@ -28,7 +29,7 @@ export function WebhooksPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newWebhook, setNewWebhook] = useState({
     url: '',
-    events: [] as string[],
+    events: [] as WebhookEvent[],
   });
   const [createdSecret, setCreatedSecret] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -187,7 +188,7 @@ export function WebhooksPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => regenerateSecretMutation.mutate(parseInt(webhook.id))}
+                      onClick={() => regenerateSecretMutation.mutate(webhook.id)}
                       disabled={regenerateSecretMutation.isPending}
                     >
                       <ArrowPathIcon className="w-4 h-4 mr-1" />
@@ -196,7 +197,7 @@ export function WebhooksPage() {
                     <Button
                       variant="danger"
                       size="sm"
-                      onClick={() => deleteMutation.mutate(parseInt(webhook.id))}
+                      onClick={() => deleteMutation.mutate(webhook.id)}
                       disabled={deleteMutation.isPending}
                     >
                       <TrashIcon className="w-4 h-4" />

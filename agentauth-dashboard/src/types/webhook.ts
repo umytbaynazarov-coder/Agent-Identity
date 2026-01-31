@@ -1,4 +1,4 @@
-export type WebhookEvent = 'agent.registered' | 'agent.verified' | 'agent.revoked';
+export type WebhookEvent = 'agent.registered' | 'agent.verified' | 'agent.verification.failed' | 'agent.revoked' | 'agent.tier.updated';
 
 export interface Webhook {
   id: number;

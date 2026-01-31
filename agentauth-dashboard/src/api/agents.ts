@@ -4,7 +4,6 @@ import type {
   AgentFilters,
   PaginationParams,
   VerificationLog,
-  PaginatedResponse,
 } from '../types/agent';
 
 export interface ListAgentsResponse {
