@@ -16,7 +16,7 @@ import { Badge } from '../../components/common/Badge';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 
-const AVAILABLE_EVENTS = [
+const AVAILABLE_EVENTS: Array<{ id: WebhookEvent; name: string; description: string }> = [
   { id: 'agent.registered', name: 'Agent Registered', description: 'Triggered when a new agent is registered' },
   { id: 'agent.verified', name: 'Agent Verified', description: 'Triggered when an agent is successfully verified' },
   { id: 'agent.verification.failed', name: 'Verification Failed', description: 'Triggered when verification fails' },
