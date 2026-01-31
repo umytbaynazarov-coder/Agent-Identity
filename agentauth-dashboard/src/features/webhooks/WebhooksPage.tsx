@@ -42,7 +42,7 @@ export function WebhooksPage() {
 
   // Create webhook mutation
   const createMutation = useMutation({
-    mutationFn: (data: { url: string; events: string[] }) =>
+    mutationFn: (data: { url: string; events: WebhookEvent[] }) =>
       webhooksApi.create(data),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['webhooks'] });
@@ -98,7 +98,7 @@ export function WebhooksPage() {
     createMutation.mutate(newWebhook);
   };
 
-  const toggleEvent = (eventId: string) => {
+  const toggleEvent = (eventId: WebhookEvent) => {
     setNewWebhook((prev) => ({
       ...prev,
       events: prev.events.includes(eventId)
