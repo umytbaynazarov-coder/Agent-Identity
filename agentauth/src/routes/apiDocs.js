@@ -5,7 +5,7 @@ const YAML = require('yamljs');
 const path = require('path');
 
 // Load OpenAPI specification
-const openApiPath = path.join(__dirname, '../../../docs/openapi.yaml');
+const openApiPath = path.join(__dirname, '../../docs/openapi.yaml');
 const swaggerDocument = YAML.load(openApiPath);
 
 // Swagger UI options
