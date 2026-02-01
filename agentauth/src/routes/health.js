@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
   const health = {
     status: 'healthy',
     service: 'AgentAuth API',
-    version: '0.5.0',
+    version: '0.6.0',
     timestamp: new Date().toISOString(),
     uptime: Math.floor((Date.now() - serverStartTime) / 1000), // seconds
     checks: {
@@ -103,7 +103,7 @@ router.get('/detailed', async (req, res) => {
   const health = {
     status: 'healthy',
     service: 'AgentAuth API',
-    version: '0.5.0',
+    version: '0.6.0',
     timestamp: new Date().toISOString(),
     uptime: {
       seconds: Math.floor((Date.now() - serverStartTime) / 1000),

@@ -139,13 +139,13 @@ const server = app.listen(PORT, () => {
   logger.info('Server started', {
     port: PORT,
     environment: process.env.NODE_ENV || 'development',
-    version: '0.5.0',
+    version: '0.6.0',
   });
 
   console.log(`
 ╔════════════════════════════════════════════════════╗
-║         AgentAuth API v0.5.0                       ║
-║         Refactored & Production-Ready              ║
+║         AgentAuth API v0.6.0                       ║
+║         Production-Grade Operations              ║
 ╠════════════════════════════════════════════════════╣
 ║  Server running on port ${PORT}                       ║
 ║                                                    ║

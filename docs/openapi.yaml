@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: AgentAuth API
-  version: 0.5.0
+  version: 0.6.0
   description: |
     **AgentAuth** is a production-ready authentication service for AI agents.
 
@@ -72,7 +72,7 @@ paths:
               example:
                 status: healthy
                 service: AgentAuth API
-                version: 0.5.0
+                version: 0.6.0
                 timestamp: '2026-01-31T12:00:00.000Z'
                 checks:
                   database: healthy
@@ -85,7 +85,7 @@ paths:
               example:
                 status: unhealthy
                 service: AgentAuth API
-                version: 0.5.0
+                version: 0.6.0
                 timestamp: '2026-01-31T12:00:00.000Z'
                 checks:
                   database: unhealthy

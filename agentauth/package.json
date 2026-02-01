@@ -1,6 +1,6 @@
 {
   "name": "agentauth",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Agent authentication API - Microsoft Entra for developers who ship",
   "main": "server.js",
   "scripts": {

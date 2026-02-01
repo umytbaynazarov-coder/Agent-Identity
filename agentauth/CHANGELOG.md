@@ -1,5 +1,198 @@
 # Changelog
 
+## [0.6.0] - 2026-02-01
+
+### 📊 Production-Ready Operations & Enterprise Trust
+
+This release focuses on **operational excellence** and **trust signals** for enterprise adoption. AgentAuth now has comprehensive documentation, live monitoring, and legal compliance - everything needed for production deployments.
+
+---
+
+### 📚 API Documentation
+
+#### **Interactive API Documentation**
+- **Swagger UI** at `/api-docs` endpoint
+- Try out API endpoints directly in browser
+- Environment selector (production vs local)
+- Persistent authorization for testing
+
+#### **OpenAPI 3.1 Specification**
+- Complete machine-readable API spec (1,100+ lines)
+- Documents all 19 endpoints
+- Request/response schemas
+- Authentication flows
+- Rate limit headers
+- Error responses (400, 401, 403, 404, 429, 500, 503)
+- Webhook event types and payload schemas
+
+#### **API Reference Documentation**
+- [docs/api-reference.md](docs/api-reference.md) (800+ lines)
+- Code examples in 3 languages (cURL, JavaScript, Python)
+- Authentication guide
+- Rate limiting documentation
+- Error handling reference
+- Webhook integration examples
+
+---
+
+### 🔍 Enhanced Health Monitoring
+
+#### **Basic Health Check** (`GET /health`)
+- Database connectivity check with response time tracking
+- Memory usage monitoring (alerts at >512MB or >80% system memory)
+- Uptime tracking (seconds since start)
+- Response time measurement
+- Returns 200 (healthy) or 503 (degraded/unhealthy)
+
+#### **Detailed Health Check** (`GET /health/detailed`)
+- Comprehensive database metrics (connection status, response time)
+- Process memory breakdown (heap, RSS, external memory)
+- System memory stats (total, free, used %)
+- System information (platform, arch, Node version, CPUs, load average)
+- Environment info (non-sensitive)
+- Human-readable uptime format
+
+---
+
+### 📈 Live Monitoring & Status Page
+
+#### **BetterStack Integration**
+- 3 active monitors:
+  - API Health (`/health`) - checks every 5 minutes
+  - Dashboard - checks every 5 minutes
+  - Database Health (validates `$.checks.database`) - checks every 10 minutes
+- Email alerts on incidents
+- Public status page: [agentauths.betteruptime.com](https://agentauths.betteruptime.com/)
+
+#### **Status Page Setup Guide**
+- [docs/status-page-setup.md](docs/status-page-setup.md) (500+ lines)
+- Comprehensive guides for 3 monitoring services:
+  - **BetterStack** (recommended - free tier, 10 monitors)
+  - **Uptime Robot** (50 free monitors)
+  - **StatusPage.io** (enterprise, $29/month)
+- Custom domain setup (status.agentauth.dev)
+- Discord webhook integration
+- Email alerting configuration
+- Status badge setup
+- Monitoring best practices
+
+---
+
+### 🎯 SLA & Operational Commitment
+
+#### **Service Level Agreement**
+- [docs/sla.md](docs/sla.md) (400+ lines)
+- **99.9% uptime target** (max 43 min downtime/month)
+- Incident response process (Detection → Investigation → Fix → Postmortem)
+- Severity levels with response times:
+  - P0-Critical: <15 min
+  - P1-High: <1 hour
+  - P2-Medium: <4 hours
+  - P3-Low: <24 hours
+- Performance targets (p50 <50ms, p95 <100ms, p99 <200ms)
+- SLA credits for managed service (10-100% refund based on downtime)
+- Self-hosted vs Managed service SLA differences
+
+#### **Public Incident Log**
+- [docs/incidents.md](docs/incidents.md) (300+ lines)
+- Incident report template with timeline, root cause, resolution, prevention
+- Example incident walkthrough (fictional) showing transparency format
+- Incident statistics tracking
+- Trust-building through radical transparency
+
+---
+
+### 📖 Deployment Documentation
+
+#### **Platform-Specific Guides** ([docs/deployment/](docs/deployment/))
+- **Railway** - Step-by-step deployment to Railway ($5-10/month)
+- **Render** - One-click deploy with Blueprint config (free tier available)
+- **DigitalOcean** - App Platform deployment ($12/month starter)
+- **Docker Compose** - Self-hosted with HTTPS, nginx, Let's Encrypt
+
+#### **Deployment Overview**
+- [docs/deployment/README.md](docs/deployment/README.md)
+- Decision tree for choosing platform
+- Cost comparisons
+- Migration guides between platforms
+- High availability setup
+
+---
+
+### 📜 Legal & Security Documentation
+
+#### **Security**
+- [SECURITY.md](SECURITY.md)
+- Vulnerability disclosure policy
+- Security contact: security@agentauth.dev
+- Supported versions
+- Response timeline (24-48h acknowledgment, 7 days fix)
+- Hall of Fame for security researchers
+
+#### **Contributing**
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- How to run locally (`docker-compose up`)
+- How to run tests (`npm test`)
+- Code style guide (ESLint + Prettier)
+- Commit message format (Conventional Commits)
+- PR process
+
+#### **Code of Conduct**
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Contributor Covenant template
+- Enforcement contact: conduct@agentauth.dev
+
+#### **Terms of Service & Privacy Policy**
+- [docs/legal/terms.md](docs/legal/terms.md)
+- [docs/legal/privacy.md](docs/legal/privacy.md)
+- Acceptable use policy
+- Data ownership (user owns all data)
+- GDPR compliance (access, export, delete rights)
+- No tracking, no analytics by default
+
+---
+
+### 🛠️ Technical Improvements
+
+#### **Repository Organization**
+- Added MIT LICENSE to repository root
+- GitHub issue templates (bug report, feature request)
+- Pull request template
+- Security policy in GitHub settings
+- Professional README badges
+
+#### **Dashboard Fixes**
+- Fixed Railway health check path (from `/health` to `/`)
+- Dashboard now accessible at [agent-identity-production.up.railway.app](https://agent-identity-production.up.railway.app)
+- nginx configuration optimized for static SPA serving
+
+---
+
+### 📊 Week 4 Completion: Critical Trust Signals
+
+All tasks from the 90-day roadmap Week 4 completed:
+- ✅ LICENSE, SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md
+- ✅ Terms of Service + Privacy Policy
+- ✅ Deployment guides for 4 platforms
+- ✅ OpenAPI spec + Swagger UI
+- ✅ Status page operational (agentauths.betteruptime.com)
+- ✅ SLA commitment documented (99.9% uptime)
+- ✅ Incident transparency process defined
+- ✅ 0 legal/security blockers for enterprise adoption
+
+---
+
+### 🚀 What's Next: Week 5 - Beta Expansion
+
+Focus shifts to user validation and community building:
+- Beta user recruitment (target: 50+ active users)
+- Onboarding optimization (time to first deployment <15 min)
+- Feedback collection and feature prioritization
+- Testimonials and case studies
+- NPS tracking and user satisfaction
+
+---
+
 ## [0.5.0] - 2026-01-31
 
 ### 🚀 Major Release: Production-Grade Architecture & Performance
