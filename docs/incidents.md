@@ -240,9 +240,9 @@ The database connection pool was configured with `max: 20` connections. During n
 If you experience an outage or service degradation:
 
 1. **Check this page first** - we may already be working on it
-2. **Check the status page:** [status.agentauth.dev](#)
-3. **Report via email:** [support@agentauth.dev](mailto:support@agentauth.dev)
-4. **Real-time updates:** Join our Discord (#status channel)
+2. **Check the status page:** [agentauths.betteruptime.com](https://agentauths.betteruptime.com/)
+3. **Report via email:** [umytbaynazarow754@gmail.com](mailto:umytbaynazarow754@gmail.com)
+4. **Real-time updates:** Check the status page for incident updates
 
 **Include in your report:**
 - What's broken? (specific API endpoint, error message)

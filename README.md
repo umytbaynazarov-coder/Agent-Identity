@@ -5,14 +5,13 @@
 [![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)](https://github.com/umytbaynazarov-coder/Agent-Identity/releases/tag/v0.5.0)
 [![Tests](https://img.shields.io/badge/tests-89%20passing-brightgreen.svg)](https://github.com/umytbaynazarov-coder/Agent-Identity)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Uptime](https://img.shields.io/badge/uptime-99.9%25%20target-success.svg)](docs/sla.md)
-<!-- Replace with actual status badge after setting up monitoring service:
-[![Status](https://betteruptime.com/status-badges/v1/monitor/xxxxx.svg)](https://status.agentauth.dev)
--->
+[![Uptime](https://img.shields.io/badge/uptime-99.9%25%20target-success.svg)](https://agentauths.betteruptime.com/)
+[![Status](https://img.shields.io/badge/status-operational-success.svg)](https://agentauths.betteruptime.com/)
 
 **Live API:** https://agentauth-production-b6b2.up.railway.app
 **API Docs:** https://agentauth-production-b6b2.up.railway.app/api-docs
-**Status:** [Service Status](docs/status-page-setup.md) | [SLA](docs/sla.md) | [Incident Log](docs/incidents.md)
+**Status Page:** https://agentauths.betteruptime.com/
+**Documentation:** [SLA](docs/sla.md) | [Incident Log](docs/incidents.md) | [Setup Guide](docs/status-page-setup.md)
 
 ## ✨ What's New in v0.5.0
 

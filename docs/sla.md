@@ -47,7 +47,7 @@ Downtime is measured when the AgentAuth API:
 ### Real-Time Status
 
 Monitor our service health at:
-- **Status Page:** [status.agentauth.dev](https://status.agentauth.dev) (when configured)
+- **Status Page:** [agentauths.betteruptime.com](https://agentauths.betteruptime.com/)
 - **Health Endpoint:** [https://agentauth-production-b6b2.up.railway.app/health](https://agentauth-production-b6b2.up.railway.app/health)
 
 ### What We Monitor
