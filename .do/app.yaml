@@ -1,0 +1,66 @@
+# DigitalOcean App Platform Spec
+# Documentation: https://docs.digitalocean.com/products/app-platform/reference/app-spec/
+
+name: agentauth
+region: nyc  # Options: nyc (New York), sfo (San Francisco), ams (Amsterdam), sgp (Singapore), blr (Bangalore)
+
+# Backend Service
+services:
+  - name: api
+    github:
+      repo: umyt-dev/Agent-Identity
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: agentauth/Dockerfile
+    source_dir: /
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xxs  # $5/month (512MB RAM, 1 vCPU)
+    # Upgrade options:
+    # - basic-xs: $12/month (1GB RAM)
+    # - basic-s: $24/month (2GB RAM)
+
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 30
+      period_seconds: 30
+      timeout_seconds: 10
+      success_threshold: 1
+      failure_threshold: 3
+
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: SUPABASE_URL
+        scope: RUN_TIME
+        type: SECRET  # Set in DigitalOcean Dashboard
+      - key: SUPABASE_KEY
+        scope: RUN_TIME
+        type: SECRET  # Set in DigitalOcean Dashboard
+      - key: JWT_SECRET
+        scope: RUN_TIME
+        type: SECRET  # Auto-generate or set manually
+      - key: FRONTEND_ORIGINS
+        value: ${APP_DOMAIN},http://localhost:5173
+
+    routes:
+      - path: /
+
+# Frontend Service (Static Site)
+static_sites:
+  - name: dashboard
+    github:
+      repo: umyt-dev/Agent-Identity
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: agentauth-dashboard/Dockerfile
+    source_dir: /
+
+    envs:
+      - key: VITE_API_BASE_URL
+        value: ${api.PUBLIC_URL}  # Auto-populated with backend URL
+
+    routes:
+      - path: /

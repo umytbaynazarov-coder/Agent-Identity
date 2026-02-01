@@ -1,0 +1,1293 @@
+openapi: 3.1.0
+info:
+  title: AgentAuth API
+  version: 0.5.0
+  description: |
+    **AgentAuth** is a production-ready authentication service for AI agents.
+
+    ## Features
+    - 🔐 JWT-based authentication
+    - 🚦 Rate limiting (100 req/15min general, 10 req/15min auth)
+    - 🔔 Webhooks for events
+    - 📊 Activity logging
+    - 🎯 Permission-based access control
+
+    ## Authentication
+    Most endpoints require Bearer token authentication. Include your API key in the `Authorization` header:
+    ```
+    Authorization: Bearer ag_your_api_key_here
+    ```
+
+    ## Rate Limits
+    - **General endpoints**: 100 requests per 15 minutes
+    - **Authentication endpoints**: 10 requests per 15 minutes
+
+    Rate limit info is included in response headers:
+    - `X-RateLimit-Limit`: Max requests allowed
+    - `X-RateLimit-Remaining`: Requests remaining
+    - `X-RateLimit-Reset`: Time until limit resets (Unix timestamp)
+
+    ## Base URL
+    - **Production**: `https://api.agentauth.dev`
+    - **Staging**: `https://staging-api.agentauth.dev`
+    - **Local**: `http://localhost:3000`
+
+  contact:
+    name: AgentAuth Support
+    email: umytbaynazarow754@gmail.com
+    url: https://agentauth.dev
+  license:
+    name: MIT
+    url: https://github.com/umyt-dev/Agent-Identity/blob/main/LICENSE
+
+servers:
+  - url: https://api.agentauth.dev
+    description: Production server
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Agents
+    description: Agent registration, verification, and management
+  - name: Webhooks
+    description: Webhook configuration and delivery tracking
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check API health status and database connectivity
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+                service: AgentAuth API
+                version: 0.5.0
+                timestamp: '2026-01-31T12:00:00.000Z'
+                checks:
+                  database: healthy
+        '503':
+          description: Service is unhealthy or degraded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: unhealthy
+                service: AgentAuth API
+                version: 0.5.0
+                timestamp: '2026-01-31T12:00:00.000Z'
+                checks:
+                  database: unhealthy
+
+  /v1/agents/register:
+    post:
+      summary: Register a new agent
+      description: |
+        Register a new AI agent and receive an API key for authentication.
+
+        **Important:** The API key is only shown once. Save it securely!
+
+        **Rate limit:** 10 requests per 15 minutes
+      operationId: registerAgent
+      tags:
+        - Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentRegistrationRequest'
+            example:
+              name: CustomerSupportAgent
+              owner_email: admin@company.com
+              permissions:
+                - read:messages
+                - write:responses
+              tier: free
+      responses:
+        '201':
+          description: Agent registered successfully
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentRegistrationResponse'
+              example:
+                agent_id: ag_1a2b3c4d5e6f
+                name: CustomerSupportAgent
+                owner_email: admin@company.com
+                api_key: ag_sk_1a2b3c4d5e6f7g8h9i0j
+                tier: free
+                permissions:
+                  - read:messages
+                  - write:responses
+                created_at: '2026-01-31T12:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/agents/verify:
+    post:
+      summary: Verify agent credentials
+      description: |
+        Verify agent credentials (agent_id + API key) and receive agent details.
+
+        **Rate limit:** 10 requests per 15 minutes
+      operationId: verifyAgent
+      tags:
+        - Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentVerificationRequest'
+            example:
+              agent_id: ag_1a2b3c4d5e6f
+              api_key: ag_sk_1a2b3c4d5e6f7g8h9i0j
+      responses:
+        '200':
+          description: Agent verified successfully
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentVerificationResponse'
+              example:
+                valid: true
+                agent_id: ag_1a2b3c4d5e6f
+                name: CustomerSupportAgent
+                tier: free
+                permissions:
+                  - read:messages
+                  - write:responses
+                status: active
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/agents:
+    get:
+      summary: List all agents
+      description: |
+        List all registered agents with pagination.
+
+        **Note:** This endpoint may require admin authentication in future versions.
+      operationId: listAgents
+      tags:
+        - Agents
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of agents to return
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: Number of agents to skip (for pagination)
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: status
+          in: query
+          description: Filter by agent status
+          required: false
+          schema:
+            type: string
+            enum: [active, inactive, suspended]
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentListResponse'
+              example:
+                agents:
+                  - agent_id: ag_1a2b3c4d5e6f
+                    name: CustomerSupportAgent
+                    owner_email: admin@company.com
+                    tier: free
+                    status: active
+                    created_at: '2026-01-31T12:00:00.000Z'
+                  - agent_id: ag_2b3c4d5e6f7g
+                    name: SalesAgent
+                    owner_email: sales@company.com
+                    tier: pro
+                    status: active
+                    created_at: '2026-01-30T10:00:00.000Z'
+                total: 2
+                limit: 50
+                offset: 0
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/agents/{agent_id}:
+    get:
+      summary: Get agent details
+      description: Retrieve detailed information about a specific agent
+      operationId: getAgent
+      tags:
+        - Agents
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+              example:
+                agent_id: ag_1a2b3c4d5e6f
+                name: CustomerSupportAgent
+                owner_email: admin@company.com
+                tier: free
+                permissions:
+                  - read:messages
+                  - write:responses
+                status: active
+                created_at: '2026-01-31T12:00:00.000Z'
+                updated_at: '2026-01-31T12:00:00.000Z'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete agent
+      description: Permanently delete an agent
+      operationId: deleteAgent
+      tags:
+        - Agents
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Agent deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              example:
+                success: true
+                message: Agent deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/agents/{agent_id}/tier:
+    put:
+      summary: Update agent tier
+      description: Update the pricing tier for an agent
+      operationId: updateAgentTier
+      tags:
+        - Agents
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tier
+              properties:
+                tier:
+                  type: string
+                  enum: [free, pro, enterprise]
+            example:
+              tier: pro
+      responses:
+        '200':
+          description: Tier updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent_id:
+                    type: string
+                  tier:
+                    type: string
+                  updated_at:
+                    type: string
+                    format: date-time
+              example:
+                agent_id: ag_1a2b3c4d5e6f
+                tier: pro
+                updated_at: '2026-01-31T12:05:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/agents/{agent_id}/status:
+    put:
+      summary: Update agent status
+      description: Activate, deactivate, or suspend an agent
+      operationId: updateAgentStatus
+      tags:
+        - Agents
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [active, inactive, suspended]
+            example:
+              status: suspended
+      responses:
+        '200':
+          description: Status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent_id:
+                    type: string
+                  status:
+                    type: string
+                  updated_at:
+                    type: string
+                    format: date-time
+              example:
+                agent_id: ag_1a2b3c4d5e6f
+                status: suspended
+                updated_at: '2026-01-31T12:10:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/agents/{agent_id}/permissions:
+    put:
+      summary: Update agent permissions
+      description: Update the permission scopes for an agent
+      operationId: updateAgentPermissions
+      tags:
+        - Agents
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - permissions
+              properties:
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - read:messages
+                    - write:responses
+                    - delete:messages
+      responses:
+        '200':
+          description: Permissions updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent_id:
+                    type: string
+                  permissions:
+                    type: array
+                    items:
+                      type: string
+                  updated_at:
+                    type: string
+                    format: date-time
+              example:
+                agent_id: ag_1a2b3c4d5e6f
+                permissions:
+                  - read:messages
+                  - write:responses
+                  - delete:messages
+                updated_at: '2026-01-31T12:15:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/agents/{agent_id}/activity:
+    get:
+      summary: Get agent activity logs
+      description: Retrieve authentication and activity logs for an agent
+      operationId: getAgentActivity
+      tags:
+        - Agents
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - name: limit
+          in: query
+          description: Maximum number of logs to return
+          required: false
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 500
+        - name: offset
+          in: query
+          description: Number of logs to skip
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Activity logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ActivityLog'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+              example:
+                logs:
+                  - id: log_1a2b3c4d
+                    agent_id: ag_1a2b3c4d5e6f
+                    success: true
+                    reason: Valid credentials
+                    ip_address: 203.0.113.42
+                    timestamp: '2026-01-31T12:00:00.000Z'
+                  - id: log_2b3c4d5e
+                    agent_id: ag_1a2b3c4d5e6f
+                    success: false
+                    reason: Invalid credentials
+                    ip_address: 203.0.113.99
+                    timestamp: '2026-01-31T11:55:00.000Z'
+                total: 2
+                limit: 100
+                offset: 0
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/webhooks:
+    post:
+      summary: Create webhook
+      description: Create a new webhook to receive events
+      operationId: createWebhook
+      tags:
+        - Webhooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookCreateRequest'
+            example:
+              agent_id: ag_1a2b3c4d5e6f
+              url: https://api.yourapp.com/webhooks/agentauth
+              events:
+                - agent.verified
+                - agent.verification_failed
+                - agent.tier_updated
+      responses:
+        '201':
+          description: Webhook created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+              example:
+                id: wh_1a2b3c4d5e6f
+                agent_id: ag_1a2b3c4d5e6f
+                url: https://api.yourapp.com/webhooks/agentauth
+                events:
+                  - agent.verified
+                  - agent.verification_failed
+                  - agent.tier_updated
+                secret: whsec_1a2b3c4d5e6f7g8h
+                is_active: true
+                created_at: '2026-01-31T12:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      summary: List webhooks
+      description: List all webhooks for a specific agent
+      operationId: listWebhooks
+      tags:
+        - Webhooks
+      parameters:
+        - name: agent_id
+          in: query
+          description: Agent ID to filter webhooks
+          required: true
+          schema:
+            type: string
+            pattern: '^ag_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: List of webhooks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  webhooks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Webhook'
+              example:
+                webhooks:
+                  - id: wh_1a2b3c4d5e6f
+                    agent_id: ag_1a2b3c4d5e6f
+                    url: https://api.yourapp.com/webhooks/agentauth
+                    events:
+                      - agent.verified
+                      - agent.verification_failed
+                    is_active: true
+                    created_at: '2026-01-31T12:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/webhooks/events:
+    get:
+      summary: List available webhook events
+      description: Get a list of all available webhook event types
+      operationId: listWebhookEvents
+      tags:
+        - Webhooks
+      responses:
+        '200':
+          description: List of available events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      type: string
+              example:
+                events:
+                  - agent.registered
+                  - agent.verified
+                  - agent.verification_failed
+                  - agent.tier_updated
+                  - agent.status_updated
+                  - agent.permissions_updated
+                  - agent.deleted
+
+  /v1/webhooks/{webhook_id}:
+    get:
+      summary: Get webhook details
+      description: Retrieve details of a specific webhook
+      operationId: getWebhook
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      responses:
+        '200':
+          description: Webhook details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      summary: Update webhook
+      description: Update webhook URL, events, or other settings
+      operationId: updateWebhook
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookUpdateRequest'
+            example:
+              url: https://api.yourapp.com/webhooks/agentauth-v2
+              events:
+                - agent.verified
+                - agent.tier_updated
+      responses:
+        '200':
+          description: Webhook updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete webhook
+      description: Permanently delete a webhook
+      operationId: deleteWebhook
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      responses:
+        '200':
+          description: Webhook deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              example:
+                success: true
+                message: Webhook deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/webhooks/{webhook_id}/regenerate-secret:
+    post:
+      summary: Regenerate webhook secret
+      description: Generate a new secret for webhook signature verification
+      operationId: regenerateWebhookSecret
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      responses:
+        '200':
+          description: Secret regenerated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  webhook_id:
+                    type: string
+                  secret:
+                    type: string
+                  message:
+                    type: string
+              example:
+                webhook_id: wh_1a2b3c4d5e6f
+                secret: whsec_2c3d4e5f6g7h8i
+                message: Secret regenerated successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/webhooks/{webhook_id}/toggle:
+    post:
+      summary: Toggle webhook status
+      description: Activate or deactivate a webhook
+      operationId: toggleWebhook
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - is_active
+              properties:
+                is_active:
+                  type: boolean
+            example:
+              is_active: false
+      responses:
+        '200':
+          description: Webhook toggled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/webhooks/{webhook_id}/deliveries:
+    get:
+      summary: Get webhook delivery history
+      description: Retrieve delivery attempts and results for a webhook
+      operationId: getWebhookDeliveries
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+        - name: limit
+          in: query
+          description: Maximum number of deliveries to return
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: Number of deliveries to skip
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Webhook delivery history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deliveries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WebhookDelivery'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+              example:
+                deliveries:
+                  - id: del_1a2b3c4d
+                    webhook_id: wh_1a2b3c4d5e6f
+                    event: agent.verified
+                    status: success
+                    status_code: 200
+                    response_time_ms: 145
+                    timestamp: '2026-01-31T12:00:00.000Z'
+                  - id: del_2b3c4d5e
+                    webhook_id: wh_1a2b3c4d5e6f
+                    event: agent.tier_updated
+                    status: failed
+                    status_code: 500
+                    response_time_ms: 30000
+                    error: Connection timeout
+                    timestamp: '2026-01-31T11:55:00.000Z'
+                total: 2
+                limit: 50
+                offset: 0
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  parameters:
+    AgentId:
+      name: agent_id
+      in: path
+      description: Unique agent identifier
+      required: true
+      schema:
+        type: string
+        pattern: '^ag_[a-zA-Z0-9]+$'
+      example: ag_1a2b3c4d5e6f
+
+    WebhookId:
+      name: webhook_id
+      in: path
+      description: Unique webhook identifier
+      required: true
+      schema:
+        type: string
+        pattern: '^wh_[a-zA-Z0-9]+$'
+      example: wh_1a2b3c4d5e6f
+
+  headers:
+    X-RateLimit-Limit:
+      description: Maximum number of requests allowed in the current window
+      schema:
+        type: integer
+      example: 10
+
+    X-RateLimit-Remaining:
+      description: Number of requests remaining in the current window
+      schema:
+        type: integer
+      example: 7
+
+    X-RateLimit-Reset:
+      description: Unix timestamp when the rate limit resets
+      schema:
+        type: integer
+      example: 1738329600
+
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - version
+        - timestamp
+        - checks
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        service:
+          type: string
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        checks:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [healthy, unhealthy, unknown]
+
+    AgentRegistrationRequest:
+      type: object
+      required:
+        - name
+        - owner_email
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Agent name
+        owner_email:
+          type: string
+          format: email
+          description: Owner's email address
+        permissions:
+          type: array
+          items:
+            type: string
+          description: Permission scopes for the agent
+          default: []
+        tier:
+          type: string
+          enum: [free, pro, enterprise]
+          default: free
+          description: Pricing tier
+
+    AgentRegistrationResponse:
+      type: object
+      required:
+        - agent_id
+        - name
+        - owner_email
+        - api_key
+        - tier
+        - permissions
+        - created_at
+      properties:
+        agent_id:
+          type: string
+        name:
+          type: string
+        owner_email:
+          type: string
+          format: email
+        api_key:
+          type: string
+          description: API key (only shown once - save it!)
+        tier:
+          type: string
+          enum: [free, pro, enterprise]
+        permissions:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+
+    AgentVerificationRequest:
+      type: object
+      required:
+        - agent_id
+        - api_key
+      properties:
+        agent_id:
+          type: string
+          pattern: '^ag_[a-zA-Z0-9]+$'
+        api_key:
+          type: string
+          pattern: '^ag_sk_[a-zA-Z0-9]+$'
+
+    AgentVerificationResponse:
+      type: object
+      required:
+        - valid
+      properties:
+        valid:
+          type: boolean
+        agent_id:
+          type: string
+        name:
+          type: string
+        tier:
+          type: string
+          enum: [free, pro, enterprise]
+        permissions:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        error:
+          type: string
+          description: Error message if valid=false
+
+    Agent:
+      type: object
+      required:
+        - agent_id
+        - name
+        - owner_email
+        - tier
+        - status
+        - created_at
+      properties:
+        agent_id:
+          type: string
+        name:
+          type: string
+        owner_email:
+          type: string
+          format: email
+        tier:
+          type: string
+          enum: [free, pro, enterprise]
+        permissions:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AgentListResponse:
+      type: object
+      required:
+        - agents
+        - total
+        - limit
+        - offset
+      properties:
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agent'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    ActivityLog:
+      type: object
+      required:
+        - id
+        - agent_id
+        - success
+        - timestamp
+      properties:
+        id:
+          type: string
+        agent_id:
+          type: string
+        success:
+          type: boolean
+        reason:
+          type: string
+        ip_address:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    WebhookCreateRequest:
+      type: object
+      required:
+        - agent_id
+        - url
+        - events
+      properties:
+        agent_id:
+          type: string
+          pattern: '^ag_[a-zA-Z0-9]+$'
+        url:
+          type: string
+          format: uri
+          description: HTTPS URL to receive webhook events
+        events:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: Array of event types to subscribe to
+
+    WebhookUpdateRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+          minItems: 1
+
+    Webhook:
+      type: object
+      required:
+        - id
+        - agent_id
+        - url
+        - events
+        - is_active
+        - created_at
+      properties:
+        id:
+          type: string
+        agent_id:
+          type: string
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        secret:
+          type: string
+          description: Webhook secret for signature verification (only shown on creation/regeneration)
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    WebhookDelivery:
+      type: object
+      required:
+        - id
+        - webhook_id
+        - event
+        - status
+        - timestamp
+      properties:
+        id:
+          type: string
+        webhook_id:
+          type: string
+        event:
+          type: string
+        status:
+          type: string
+          enum: [success, failed, pending]
+        status_code:
+          type: integer
+        response_time_ms:
+          type: integer
+        error:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+
+  responses:
+    BadRequest:
+      description: Bad request - validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Validation failed
+            message: Invalid input data
+            details:
+              - field: email
+                message: Must be a valid email address
+
+    Unauthorized:
+      description: Unauthorized - invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Unauthorized
+            message: Invalid agent credentials
+
+    Forbidden:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Forbidden
+            message: Insufficient permissions to perform this action
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Not Found
+            message: Agent not found
+
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+            example: 0
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Rate Limit Exceeded
+            message: Too many requests. Please try again later.
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Internal Server Error
+            message: An unexpected error occurred

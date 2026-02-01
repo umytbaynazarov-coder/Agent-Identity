@@ -1,7 +1,12 @@
 # Multi-stage build for AgentAuth Dashboard
+# Cache bust: 2026-01-31-v2
 
 # Build stage
 FROM node:20-alpine AS builder
+
+# Accept build-time environment variables for Vite
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 WORKDIR /app
 
@@ -14,7 +19,7 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application (VITE_API_BASE_URL will be baked in)
 RUN npm run build
 
 # Production stage

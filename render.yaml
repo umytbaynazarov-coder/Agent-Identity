@@ -1,0 +1,40 @@
+# Render Blueprint for AgentAuth
+# Documentation: https://render.com/docs/blueprint-spec
+
+services:
+  # AgentAuth Backend API
+  - type: web
+    name: agentauth-api
+    runtime: docker
+    dockerfilePath: ./agentauth/Dockerfile
+    dockerContext: ./agentauth
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: SUPABASE_URL
+        sync: false  # Set in Render Dashboard
+      - key: SUPABASE_KEY
+        sync: false  # Set in Render Dashboard
+      - key: JWT_SECRET
+        generateValue: true  # Auto-generate on first deploy
+      - key: FRONTEND_ORIGINS
+        value: https://agentauth-dashboard.onrender.com,http://localhost:5173
+    healthCheckPath: /health
+    plan: starter  # Free tier available, $7/month for starter
+    region: oregon  # Choose: oregon, frankfurt, singapore
+    autoDeploy: true  # Auto-deploy on git push
+
+  # AgentAuth Dashboard (Frontend)
+  - type: web
+    name: agentauth-dashboard
+    runtime: docker
+    dockerfilePath: ./agentauth-dashboard/Dockerfile
+    dockerContext: ./agentauth-dashboard
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://agentauth-api.onrender.com  # Update with your backend URL
+    plan: free  # Static sites are free on Render
+    region: oregon
+    autoDeploy: true

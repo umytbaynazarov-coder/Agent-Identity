@@ -36,7 +36,7 @@
                 <a href="#quickstart">Quick Start</a>
                 <a href="#playground">Playground</a>
                 <a href="#demo">Demo</a>
-                <a href="https://github.com/umytbaynazarov-coder/Agent-Identity" target="_blank" class="nav-link-github">
+                <a href="https://github.com/yourusername/agentauth" target="_blank" class="nav-link-github">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
                     </svg>
@@ -57,7 +57,7 @@
         <div class="hero-container">
             <div class="hero-badge">
                 <span class="badge-dot"></span>
-                <span>v0.5.0 — Production-Ready</span>
+                <span>v0.4.0 — Latest Release</span>
             </div>
             
             <h1 class="hero-title">
@@ -77,7 +77,7 @@
                         <path d="M5 12h14M12 5l7 7-7 7"/>
                     </svg>
                 </a>
-                <a href="https://github.com/umytbaynazarov-coder/Agent-Identity" class="btn-secondary" target="_blank">
+                <a href="https://github.com/yourusername/agentauth" class="btn-secondary" target="_blank">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
                     </svg>
@@ -87,7 +87,7 @@
             
             <div class="hero-stats">
                 <div class="stat">
-                    <div class="stat-value">89</div>
+                    <div class="stat-value">25</div>
                     <div class="stat-label">Tests Passing</div>
                 </div>
                 <div class="stat">
@@ -557,41 +557,41 @@ async with AgentAuthClient(base_url='https://agentauth-production-b6b2.up.railwa
     <section class="updates">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">What's New in v0.5.0</h2>
+                <h2 class="section-title">What's New in v0.4.0</h2>
                 <p class="section-subtitle">Latest improvements and fixes</p>
             </div>
             
             <div class="updates-grid">
                 <div class="update-card highlight">
-                    <div class="update-icon critical">🚀</div>
-                    <h3>Production Architecture</h3>
+                    <div class="update-icon critical">🔥</div>
+                    <h3>Critical Fixes</h3>
                     <ul>
-                        <li>87% backend code reduction (1,590 → 208 lines)</li>
-                        <li>Modular architecture with services, routes, validators</li>
-                        <li>API versioning with /v1/ endpoints</li>
-                        <li>Winston structured logging</li>
+                        <li>Fixed memory leak in rate limiting store</li>
+                        <li>Fixed race condition in rate limiter</li>
+                        <li>Cache tier in JWT for better performance</li>
+                        <li>Added missing database indexes</li>
+                    </ul>
+                </div>
+                
+                <div class="update-card">
+                    <div class="update-icon">✨</div>
+                    <h3>New Features</h3>
+                    <ul>
+                        <li>Revoke all refresh tokens endpoint</li>
+                        <li>Regenerate webhook secrets</li>
+                        <li>Update agent tier (admin)</li>
+                        <li>Enhanced pagination metadata</li>
                     </ul>
                 </div>
                 
                 <div class="update-card">
                     <div class="update-icon">⚡</div>
-                    <h3>Frontend Optimization</h3>
+                    <h3>Performance</h3>
                     <ul>
-                        <li>88% bundle size reduction (800 KB → 92 KB)</li>
-                        <li>Code splitting with React.lazy</li>
-                        <li>Performance monitoring with Web Vitals</li>
-                        <li>60%+ fewer API calls</li>
-                    </ul>
-                </div>
-                
-                <div class="update-card">
-                    <div class="update-icon">✅</div>
-                    <h3>Quality & Testing</h3>
-                    <ul>
-                        <li>89 tests passing (56 backend + 33 frontend)</li>
-                        <li>Comprehensive skeleton loaders</li>
-                        <li>Sentry error tracking integration</li>
-                        <li>Zero TypeScript errors</li>
+                        <li>Eliminated unnecessary DB queries</li>
+                        <li>Added 3 new indexes</li>
+                        <li>Zero memory leaks</li>
+                        <li>Improved test coverage (25 tests)</li>
                     </ul>
                 </div>
             </div>
@@ -605,7 +605,7 @@ async with AgentAuthClient(base_url='https://agentauth-production-b6b2.up.railwa
                 <h2>Ready to Secure Your Agents?</h2>
                 <p>Join developers building the next generation of AI applications</p>
                 <div class="cta-buttons">
-                    <a href="https://github.com/umytbaynazarov-coder/Agent-Identity" class="btn-primary" target="_blank">
+                    <a href="https://github.com/yourusername/agentauth" class="btn-primary" target="_blank">
                         Get Started Free
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -650,13 +650,13 @@ async with AgentAuthClient(base_url='https://agentauth-production-b6b2.up.railwa
                         <a href="#features">Features</a>
                         <a href="#quickstart">Quick Start</a>
                         <a href="https://docs.agentauth.dev" target="_blank">Documentation</a>
-                        <a href="https://github.com/umytbaynazarov-coder/Agent-Identity/releases" target="_blank">Changelog</a>
+                        <a href="https://github.com/yourusername/agentauth/releases" target="_blank">Changelog</a>
                     </div>
                     
                     <div class="footer-column">
                         <h4>Resources</h4>
-                        <a href="https://github.com/umytbaynazarov-coder/Agent-Identity" target="_blank">GitHub</a>
-                        <a href="https://github.com/umytbaynazarov-coder/Agent-Identity/issues" target="_blank">Issues</a>
+                        <a href="https://github.com/yourusername/agentauth" target="_blank">GitHub</a>
+                        <a href="https://github.com/yourusername/agentauth/issues" target="_blank">Issues</a>
                         <a href="https://docs.agentauth.dev/api" target="_blank">API Reference</a>
                         <a href="#demo">Live Demo</a>
                     </div>
@@ -664,8 +664,8 @@ async with AgentAuthClient(base_url='https://agentauth-production-b6b2.up.railwa
                     <div class="footer-column">
                         <h4>Community</h4>
                         <a href="https://x.com/b_umyt" target="_blank">X</a>
-                        <a href="https://discord.gg/wy2r2suk" target="_blank">Discord(coming)</a>
-                        <a href="https://github.com/umytbaynazarov-coder/Agent-Identity/discussions" target="_blank">Discussions(coming)</a>
+                        <a href="https://discord.gg/agentauth" target="_blank">Discord(coming)</a>
+                        <a href="https://github.com/yourusername/agentauth/discussions" target="_blank">Discussions(coming)</a>
                     </div>
                 </div>
             </div>

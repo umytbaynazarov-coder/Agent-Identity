@@ -19,9 +19,7 @@ import { format } from 'date-fns';
 const AVAILABLE_EVENTS: Array<{ id: WebhookEvent; name: string; description: string }> = [
   { id: 'agent.registered', name: 'Agent Registered', description: 'Triggered when a new agent is registered' },
   { id: 'agent.verified', name: 'Agent Verified', description: 'Triggered when an agent is successfully verified' },
-  { id: 'agent.verification.failed', name: 'Verification Failed', description: 'Triggered when verification fails' },
   { id: 'agent.revoked', name: 'Agent Revoked', description: 'Triggered when an agent is revoked' },
-  { id: 'agent.tier.updated', name: 'Tier Updated', description: 'Triggered when agent tier changes' },
 ];
 
 export function WebhooksPage() {

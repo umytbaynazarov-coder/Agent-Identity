@@ -1,0 +1,22 @@
+{
+  "name": "agent-identity",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Agent Identity - Authentication and authorization for AI agents",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11"
+  },
+  "lint-staged": {
+    "agentauth/**/*.js": [
+      "cd agentauth && npm test -- --passWithNoTests"
+    ],
+    "agentauth-dashboard/**/*.{ts,tsx}": [
+      "cd agentauth-dashboard && npm run lint",
+      "cd agentauth-dashboard && npm test -- --run --passWithNoTests"
+    ]
+  }
+}

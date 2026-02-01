@@ -22,6 +22,29 @@
 
 ---
 
+## 📚 API Documentation
+
+Comprehensive API documentation is available:
+
+- **[Interactive API Docs (Swagger UI)](http://localhost:3000/api-docs)** - Try out endpoints directly
+- **[API Reference](docs/api-reference.md)** - Complete endpoint reference with code examples
+- **[OpenAPI Specification](docs/openapi.yaml)** - Machine-readable API spec (OpenAPI 3.1)
+
+**Quick Start:**
+```bash
+# Register an agent
+curl -X POST https://api.agentauth.dev/v1/agents/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"MyAgent","owner_email":"you@example.com"}'
+
+# Verify credentials
+curl -X POST https://api.agentauth.dev/v1/agents/verify \
+  -H "Content-Type: application/json" \
+  -d '{"agent_id":"ag_xxx","api_key":"ag_sk_xxx"}'
+```
+
+---
+
 ## The Problem
 
 AI agents need to interact with each other and external services, but there's no standard way to:

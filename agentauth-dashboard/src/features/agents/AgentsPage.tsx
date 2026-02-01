@@ -1,24 +1,58 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { agentsApi } from '../../api/agents';
 import { Badge, getStatusBadgeVariant } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { AgentDetailsModal } from './AgentDetailsModal';
+import { Modal } from '../../components/common/Modal';
 import type { Agent } from '../../types/agent';
 import { format } from 'date-fns';
+import { toast } from 'react-hot-toast';
 
 export function AgentsPage() {
+  const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<Agent['status'] | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [newAgent, setNewAgent] = useState({
+    name: '',
+    owner_email: '',
+    description: '',
+    permissions: ['*:*:*'] as string[],
+  });
 
   const { data: agents, isLoading, error } = useQuery({
     queryKey: ['agents', statusFilter],
     queryFn: () =>
       agentsApi.list(statusFilter !== 'all' ? { status: statusFilter } : undefined),
   });
+
+  const registerMutation = useMutation({
+    mutationFn: async (data: typeof newAgent) => {
+      const response = await agentsApi.register(data);
+      return response;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      setIsRegisterModalOpen(false);
+      setNewAgent({ name: '', owner_email: '', description: '', permissions: ['*:*:*'] });
+      toast.success(`Agent registered! API Key: ${data.api_key} (save this, it won't be shown again)`);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to register agent');
+    },
+  });
+
+  const handleRegisterAgent = async () => {
+    if (!newAgent.name || !newAgent.owner_email) {
+      toast.error('Name and email are required');
+      return;
+    }
+    registerMutation.mutate(newAgent);
+  };
 
   // Client-side search filter
   const filteredAgents = agents?.filter((agent) => {
@@ -41,7 +75,7 @@ export function AgentsPage() {
             Manage and monitor all registered agents
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setIsRegisterModalOpen(true)}>
           <PlusIcon className="w-5 h-5 mr-2" />
           Register Agent
         </Button>
@@ -199,6 +233,69 @@ export function AgentsPage() {
           agentId={selectedAgentId}
         />
       )}
+
+      {/* Register Agent Modal */}
+      <Modal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        title="Register New Agent"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Name *
+            </label>
+            <input
+              type="text"
+              value={newAgent.name}
+              onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
+              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="My Agent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Owner Email *
+            </label>
+            <input
+              type="email"
+              value={newAgent.owner_email}
+              onChange={(e) => setNewAgent({ ...newAgent, owner_email: e.target.value })}
+              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="owner@example.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Description
+            </label>
+            <textarea
+              value={newAgent.description}
+              onChange={(e) => setNewAgent({ ...newAgent, description: e.target.value })}
+              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Optional description"
+              rows={3}
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button
+              variant="secondary"
+              onClick={() => setIsRegisterModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRegisterAgent}
+              disabled={registerMutation.isPending}
+            >
+              {registerMutation.isPending ? 'Registering...' : 'Register Agent'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

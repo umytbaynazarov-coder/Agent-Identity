@@ -39,6 +39,20 @@ export interface UpdatePermissionsResponse {
   agent: Agent;
 }
 
+export interface RegisterAgentRequest {
+  name: string;
+  owner_email: string;
+  description?: string;
+  permissions?: string[];
+}
+
+export interface RegisterAgentResponse {
+  success: boolean;
+  message: string;
+  agent: Agent;
+  api_key: string;
+}
+
 export const agentsApi = {
   /**
    * List all agents (admin only)
@@ -51,6 +65,13 @@ export const agentsApi = {
 
     const response = await apiClient.get<ListAgentsResponse>('/agents', params);
     return response.agents;
+  },
+
+  /**
+   * Register a new agent
+   */
+  async register(data: RegisterAgentRequest): Promise<RegisterAgentResponse> {
+    return apiClient.post<RegisterAgentResponse>('/agents/register', data);
   },
 
   /**
