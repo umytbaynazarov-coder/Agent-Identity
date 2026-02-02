@@ -17,7 +17,7 @@ Example usage:
     ... )
 """
 
-__version__ = "0.1.0"
+__version__ = "0.7.0"
 
 from .client import AgentAuthClient
 from .permissions import Permissions, Permission
@@ -28,6 +28,33 @@ from .types import (
     RefreshTokenRequest,
     Webhook,
     ActivityLog,
+    # Persona types
+    Persona,
+    PersonaPersonality,
+    PersonaConstraints,
+    PersonaGuardrails,
+    PersonaResponse,
+    PersonaVerifyResponse,
+    PersonaHistoryEntry,
+    PersonaHistoryResponse,
+    # ZKP types
+    RegisterCommitmentRequest,
+    RegisterCommitmentResponse,
+    VerifyAnonymousRequest,
+    VerifyAnonymousResponse,
+    # Drift types
+    HealthPingRequest,
+    HealthPingResponse,
+    AnomalyNote,
+    DriftScoreResponse,
+    DriftTrend,
+    DriftHistoryEntry,
+    DriftHistoryResponse,
+    DriftConfig,
+    # Custom errors
+    PersonaValidationError,
+    DriftThresholdError,
+    ZKPVerificationError,
 )
 
 __all__ = [
@@ -40,4 +67,31 @@ __all__ = [
     "RefreshTokenRequest",
     "Webhook",
     "ActivityLog",
+    # Persona
+    "Persona",
+    "PersonaPersonality",
+    "PersonaConstraints",
+    "PersonaGuardrails",
+    "PersonaResponse",
+    "PersonaVerifyResponse",
+    "PersonaHistoryEntry",
+    "PersonaHistoryResponse",
+    # ZKP
+    "RegisterCommitmentRequest",
+    "RegisterCommitmentResponse",
+    "VerifyAnonymousRequest",
+    "VerifyAnonymousResponse",
+    # Drift
+    "HealthPingRequest",
+    "HealthPingResponse",
+    "AnomalyNote",
+    "DriftScoreResponse",
+    "DriftTrend",
+    "DriftHistoryEntry",
+    "DriftHistoryResponse",
+    "DriftConfig",
+    # Errors
+    "PersonaValidationError",
+    "DriftThresholdError",
+    "ZKPVerificationError",
 ]

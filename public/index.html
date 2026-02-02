@@ -3,8 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgentAuth - Passport for AI Agents</title>
-    <meta name="description" content="Simple, secure authentication system for AI agents. Open source, developer-first, built for scale.">
+    <title>AgentAuth - Passport for AI Agents | Soul Layer, ZKP, Anti-Drift</title>
+    <meta name="description" content="AI Agent authentication with Soul Layer persona system, zero-knowledge proof verification, and anti-drift behavioral monitoring. Open source, developer-first.">
+    <meta name="keywords" content="AI agent authentication, soul layer, agent persona, zero-knowledge proof, ZKP, anti-drift, behavioral drift detection, AI agent identity, agent auth, JWT, API key">
+    <meta property="og:title" content="AgentAuth v0.7.0 - Soul Layer for AI Agents">
+    <meta property="og:description" content="Give your AI agents a digital soul. Persona system, anonymous ZKP verification, and real-time behavioral drift detection.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AgentAuth - Soul Layer for AI Agents">
+    <meta name="twitter:description" content="Persona system, ZKP anonymous verification, and anti-drift vault for AI agent identity.">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,6 +41,7 @@
             <div class="nav-links">
                 <a href="#features">Features</a>
                 <a href="#quickstart">Quick Start</a>
+                <a href="#sandbox">Sandbox</a>
                 <a href="#playground">Playground</a>
                 <a href="#demo">Demo</a>
                 <a href="https://github.com/umytbaynazarov-coder/Agent-Identity" target="_blank" class="nav-link-github">
@@ -57,7 +65,7 @@
         <div class="hero-container">
             <div class="hero-badge">
                 <span class="badge-dot"></span>
-                <span>v0.6.0 — Production Operations</span>
+                <span>v0.7.0 — Soul Layer</span>
             </div>
             
             <h1 class="hero-title">
@@ -231,6 +239,44 @@
                     <h3>Enterprise Ready</h3>
                     <p>Legal compliance (TOS, Privacy), SLA, security policy. Zero blockers for adoption.</p>
                 </div>
+
+                <div class="feature-card feature-card-new" data-feature="persona">
+                    <div class="feature-icon feature-icon-soul">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="8" r="5"/>
+                            <path d="M3 21v-2a7 7 0 0114 0v2"/>
+                            <path d="M17 11l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <span class="feature-badge">NEW in v0.7.0</span>
+                    <h3>Persona System</h3>
+                    <p>Define your agent's "digital soul" with personality traits, guardrails, and constraints. HMAC-signed integrity verification and version history.</p>
+                </div>
+
+                <div class="feature-card feature-card-new" data-feature="zkp">
+                    <div class="feature-icon feature-icon-soul">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 9v-2M12 17v-2M9 12H7M17 12h-2"/>
+                        </svg>
+                    </div>
+                    <span class="feature-badge">NEW in v0.7.0</span>
+                    <h3>ZKP Verification</h3>
+                    <p>Zero-knowledge proof authentication. Agents prove identity without revealing credentials. Groth16 proofs and hash-based commitment modes.</p>
+                </div>
+
+                <div class="feature-card feature-card-new" data-feature="drift">
+                    <div class="feature-icon feature-icon-soul">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                    </div>
+                    <span class="feature-badge">NEW in v0.7.0</span>
+                    <h3>Anti-Drift Vault</h3>
+                    <p>Real-time behavioral drift detection with weighted scoring, spike anomaly detection, and automatic revocation when agents go off-baseline.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -389,11 +435,11 @@ response = requests.get('/api/data',
                                 </svg>
                             </button>
                         </div>
-                        <pre id="curl-register"><code>curl -X POST https://api.agentauth.dev/agents/register \
+                        <pre id="curl-register"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/agents/register \
   -H "Content-Type: application/json" \
-  -H "x-api-key: YOUR_API_KEY" \
   -d '{
     "name": "MyAgent",
+    "owner_email": "you@example.com",
     "permissions": ["read", "write"]
   }'</code></pre>
                     </div>
@@ -482,6 +528,164 @@ response = requests.get('/api/data',
                     </svg>
                     <h3>Authentication Complete!</h3>
                     <p>Your agent is now authenticated and ready to make secure API calls.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Try in Sandbox Section -->
+    <section id="sandbox" class="sandbox">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Try v0.7.0 in the Sandbox</h2>
+                <p class="section-subtitle">Interactive curl examples for Persona, ZKP, and Anti-Drift</p>
+            </div>
+
+            <div class="sandbox-tabs">
+                <button class="sandbox-tab-btn active" data-sandbox="persona">Persona</button>
+                <button class="sandbox-tab-btn" data-sandbox="zkp">ZKP</button>
+                <button class="sandbox-tab-btn" data-sandbox="drift">Anti-Drift</button>
+            </div>
+
+            <div class="sandbox-panels">
+                <!-- Persona Sandbox -->
+                <div class="sandbox-panel active" data-sandbox-panel="persona">
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Register a Persona</span>
+                            <button class="copy-btn" data-copy="sandbox-persona-register">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="sandbox-persona-register"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/agents/YOUR_AGENT_ID/persona \
+  -H "Content-Type: application/json" \
+  -H "X-Api-Key: YOUR_API_KEY" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "version": "1.0.0",
+    "personality": {
+      "traits": { "helpfulness": 0.9, "formality": 0.7 }
+    },
+    "guardrails": {
+      "toxicity_threshold": 0.3,
+      "hallucination_tolerance": "strict"
+    },
+    "constraints": {
+      "forbidden_topics": ["politics", "religion"],
+      "max_response_length": 2000
+    }
+  }'</code></pre>
+                    </div>
+
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Verify Persona Integrity</span>
+                            <button class="copy-btn" data-copy="sandbox-persona-verify">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="sandbox-persona-verify"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/agents/YOUR_AGENT_ID/persona/verify \
+  -H "X-Api-Key: YOUR_API_KEY" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Response: { "valid": true, "persona_hash": "abc123...", "reason": "HMAC match" }</code></pre>
+                    </div>
+                </div>
+
+                <!-- ZKP Sandbox -->
+                <div class="sandbox-panel" data-sandbox-panel="zkp">
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Register ZKP Commitment</span>
+                            <button class="copy-btn" data-copy="sandbox-zkp-commit">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="sandbox-zkp-commit"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/zkp/register-commitment \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "YOUR_AGENT_ID",
+    "api_key": "YOUR_API_KEY",
+    "expires_in": 3600
+  }'
+
+# Response: { "commitment": "abc123...", "salt": "xyz789..." }
+# SAVE THE SALT — it is only shown once!</code></pre>
+                    </div>
+
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Verify Anonymously (Hash Mode)</span>
+                            <button class="copy-btn" data-copy="sandbox-zkp-verify">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="sandbox-zkp-verify"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/zkp/verify-anonymous \
+  -H "Content-Type: application/json" \
+  -d '{
+    "commitment": "YOUR_COMMITMENT_HASH",
+    "mode": "hash",
+    "preimage_hash": "SHA256_OF_AGENT_ID_SALT"
+  }'
+
+# Response: { "valid": true, "permissions": ["read","write"], "tier": "pro" }</code></pre>
+                    </div>
+                </div>
+
+                <!-- Anti-Drift Sandbox -->
+                <div class="sandbox-panel" data-sandbox-panel="drift">
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Submit Health Ping</span>
+                            <button class="copy-btn" data-copy="sandbox-drift-ping">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="sandbox-drift-ping"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/drift/YOUR_AGENT_ID/health-ping \
+  -H "Content-Type: application/json" \
+  -H "X-Api-Key: YOUR_API_KEY" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "metrics": {
+      "toxicity_score": 0.12,
+      "response_adherence": 0.95,
+      "hallucination_rate": 0.03
+    },
+    "request_count": 150
+  }'
+
+# Response: { "drift_score": 0.08, "status": "ok" }</code></pre>
+                    </div>
+
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">Get Drift Score</span>
+                            <button class="copy-btn" data-copy="sandbox-drift-score">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <pre id="sandbox-drift-score"><code>curl https://agentauth-production-b6b2.up.railway.app/v1/drift/YOUR_AGENT_ID/drift-score
+
+# Response includes score, thresholds, trend, and spike warnings</code></pre>
+                    </div>
                 </div>
             </div>
         </div>
@@ -580,8 +784,38 @@ async with AgentAuthClient(base_url='https://agentauth-production-b6b2.up.railwa
                 </a>
                 <a href="https://agentauth-production-b6b2.up.railway.app/api-docs" target="_blank" class="doc-link primary">
                     <span class="doc-icon">📚</span>
-                    <span>Full Documentation</span>
+                    <span>Full API Docs</span>
                 </a>
+            </div>
+
+            <!-- v0.7.0 API Endpoint Reference -->
+            <div class="api-endpoints-ref">
+                <h3>v0.7.0 New Endpoints</h3>
+                <div class="endpoints-grid">
+                    <div class="endpoint-group">
+                        <h4>Persona</h4>
+                        <code>POST /v1/agents/:id/persona</code>
+                        <code>GET /v1/agents/:id/persona</code>
+                        <code>PUT /v1/agents/:id/persona</code>
+                        <code>POST /v1/agents/:id/persona/verify</code>
+                        <code>GET /v1/agents/:id/persona/history</code>
+                        <code>GET /v1/agents/:id/persona/export</code>
+                        <code>POST /v1/agents/:id/persona/import</code>
+                    </div>
+                    <div class="endpoint-group">
+                        <h4>ZKP</h4>
+                        <code>POST /v1/zkp/register-commitment</code>
+                        <code>POST /v1/zkp/verify-anonymous</code>
+                    </div>
+                    <div class="endpoint-group">
+                        <h4>Anti-Drift</h4>
+                        <code>POST /v1/drift/:id/health-ping</code>
+                        <code>GET /v1/drift/:id/drift-score</code>
+                        <code>GET /v1/drift/:id/drift-history</code>
+                        <code>PUT /v1/drift/:id/drift-config</code>
+                        <code>GET /v1/drift/:id/drift-config</code>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -590,43 +824,53 @@ async with AgentAuthClient(base_url='https://agentauth-production-b6b2.up.railwa
     <section class="updates">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">What's New in v0.6.0</h2>
-                <p class="section-subtitle">Production-ready operations & enterprise trust</p>
+                <h2 class="section-title">What's New in v0.7.0</h2>
+                <p class="section-subtitle">Soul Layer — Persona, ZKP, and Anti-Drift for AI Agents</p>
             </div>
 
             <div class="updates-grid">
                 <div class="update-card highlight">
-                    <div class="update-icon critical">📚</div>
-                    <h3>Interactive Documentation</h3>
+                    <div class="update-icon critical">🧬</div>
+                    <h3>Persona ("Digital Soul")</h3>
                     <ul>
-                        <li>Swagger UI at /api-docs (test in browser)</li>
-                        <li>OpenAPI 3.1 spec (1,100+ lines)</li>
-                        <li>Code examples in 3 languages</li>
-                        <li>Environment selector (prod vs local)</li>
+                        <li>Register & version agent personality traits</li>
+                        <li>Guardrails: toxicity, hallucination, citations</li>
+                        <li>HMAC-SHA256 integrity verification</li>
+                        <li>Export/import signed persona bundles</li>
                     </ul>
                 </div>
 
                 <div class="update-card">
-                    <div class="update-icon">📊</div>
-                    <h3>Live Monitoring</h3>
+                    <div class="update-icon">🔐</div>
+                    <h3>ZKP Anonymous Auth</h3>
                     <ul>
-                        <li>BetterStack status page (3 monitors)</li>
-                        <li>99.9% uptime SLA commitment</li>
-                        <li>Enhanced health endpoints (/health/detailed)</li>
-                        <li>Public incident transparency</li>
+                        <li>Zero-knowledge proof commitments</li>
+                        <li>Groth16 proof verification (snarkjs)</li>
+                        <li>Hash-based fallback mode</li>
+                        <li>Prove identity without revealing secrets</li>
                     </ul>
                 </div>
 
                 <div class="update-card">
-                    <div class="update-icon">🔒</div>
-                    <h3>Enterprise Ready</h3>
+                    <div class="update-icon">📡</div>
+                    <h3>Anti-Drift Vault</h3>
                     <ul>
-                        <li>Legal compliance (TOS, Privacy Policy)</li>
-                        <li>Security policy & vulnerability disclosure</li>
-                        <li>Deployment guides (4 platforms)</li>
-                        <li>Zero blockers for enterprise adoption</li>
+                        <li>Weighted behavioral drift scoring</li>
+                        <li>Std-dev spike anomaly detection</li>
+                        <li>Auto-revoke on threshold breach</li>
+                        <li>Configurable baselines & sensitivity</li>
                     </ul>
                 </div>
+            </div>
+
+            <div class="updates-blog-teaser">
+                <a href="https://github.com/umytbaynazarov-coder/Agent-Identity/blob/main/docs/blog/anti-drift-deep-dive.md" target="_blank" class="blog-teaser-link">
+                    <span class="blog-teaser-tag">Blog</span>
+                    <span class="blog-teaser-text">Deep Dive on Anti-Drift: How behavioral scoring keeps AI agents on-baseline</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
             </div>
         </div>
     </section>

@@ -14,6 +14,10 @@ const AVAILABLE_EVENTS = [
   'tier.upgraded',
   'tier.downgraded',
   'permissions.updated',
+  'agent.drift.warning',
+  'agent.drift.revoked',
+  'persona.created',
+  'persona.updated',
 ];
 
 /**

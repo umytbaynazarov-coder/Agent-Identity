@@ -103,7 +103,15 @@ Subscribe to real-time events:
 
 Track every agent action with queryable activity logs and pagination support.
 
-### 5. CLI Tools
+### 5. Soul Layer (v0.7.0)
+
+Three pillars of agent identity and behavioral trust:
+
+- **Persona System** - HMAC-SHA256 signed behavioral profiles with traits, guardrails, and constraints
+- **ZKP Anonymous Verification** - Prove agent identity without revealing credentials
+- **Anti-Drift Vault** - Weighted drift scoring, spike detection, and auto-revoke
+
+### 6. CLI Tools
 
 ```bash
 agentauth init          # Interactive setup
@@ -143,7 +151,15 @@ agentauth migrate auth0 \
 ### REST API
 
 - **[API Endpoints](../agentauth/README.md)** - Backend REST API documentation
+- **[API Reference](api-reference.md)** - Complete v0.7.0 endpoint reference with code examples
+- **[OpenAPI Specification](openapi.yaml)** - Machine-readable API spec (OpenAPI 3.1, 35 endpoints)
 - **[Scoped Permissions](../agentauth/SCOPED_PERMISSIONS.md)** - Permission system guide
+
+### Soul Layer (v0.7.0)
+
+- **[Persona Schema Reference](persona-schema.md)** - JSON schema for agent behavioral profiles
+- **[ZKP Proof Guide](zkp-proof-guide.md)** - Client-side anonymous verification (hash + Groth16)
+- **[Drift-Proof Quickstart](drift-proof-quickstart.md)** - Build a drift-proof agent in 5 steps
 
 ---
 

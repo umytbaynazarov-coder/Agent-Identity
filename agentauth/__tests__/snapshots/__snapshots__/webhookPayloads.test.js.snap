@@ -1,0 +1,170 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Webhook Payload Snapshots agent.drift.revoked should match snapshot 1`] = `
+{
+  "agent_id": "agt_snapshot_test",
+  "data": {
+    "agent_id": "agt_snapshot_test",
+    "auto_revoked": true,
+    "drift_score": 0.45,
+    "metrics_summary": {
+      "anomaly_notes": [
+        {
+          "current_value": 0.6,
+          "delta": 4.5,
+          "mean": 0.02,
+          "metric": "toxicity_score",
+          "stddev": 0.01,
+          "threshold": 2,
+        },
+      ],
+      "baseline": {
+        "avg_response_length": 1000,
+        "constraint_violations": 0,
+        "hallucination_rate": 0.05,
+        "response_adherence": 0.95,
+        "toxicity_score": 0,
+      },
+      "drift_score": 0.45,
+      "metrics": {
+        "avg_response_length": 4500,
+        "constraint_violations": 0.5,
+        "hallucination_rate": 0.55,
+        "response_adherence": 0.4,
+        "toxicity_score": 0.6,
+      },
+    },
+    "threshold": 0.3,
+    "timestamp": "2025-01-15T12:00:00.000Z",
+  },
+  "event": "agent.drift.revoked",
+  "timestamp": "2025-01-15T12:00:00.000Z",
+}
+`;
+
+exports[`Webhook Payload Snapshots agent.drift.warning should match snapshot 1`] = `
+{
+  "agent_id": "agt_snapshot_test",
+  "data": {
+    "agent_id": "agt_snapshot_test",
+    "drift_score": 0.26,
+    "metrics_summary": {
+      "anomaly_notes": [],
+      "baseline": {
+        "avg_response_length": 1000,
+        "constraint_violations": 0,
+        "hallucination_rate": 0.05,
+        "response_adherence": 0.95,
+        "toxicity_score": 0,
+      },
+      "drift_score": 0.26,
+      "metrics": {
+        "avg_response_length": 1400,
+        "constraint_violations": 0.08,
+        "hallucination_rate": 0.12,
+        "response_adherence": 0.85,
+        "toxicity_score": 0.05,
+      },
+    },
+    "threshold": 0.24,
+    "timestamp": "2025-01-15T12:00:00.000Z",
+  },
+  "event": "agent.drift.warning",
+  "timestamp": "2025-01-15T12:00:00.000Z",
+}
+`;
+
+exports[`Webhook Payload Snapshots persona.created should match snapshot 1`] = `
+{
+  "agent_id": "agt_snapshot_test",
+  "data": {
+    "persona": {
+      "constraints": {
+        "forbidden_topics": [
+          "politics",
+          "religion",
+        ],
+        "max_response_length": 2000,
+      },
+      "guardrails": {
+        "hallucination_tolerance": "strict",
+        "toxicity_threshold": 0.3,
+      },
+      "personality": {
+        "traits": {
+          "formality": 0.7,
+          "helpfulness": 0.9,
+        },
+      },
+      "version": "1.0.0",
+    },
+    "persona_hash": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+    "version": "1.0.0",
+  },
+  "event": "persona.created",
+  "timestamp": "2025-01-15T12:00:00.000Z",
+}
+`;
+
+exports[`Webhook Payload Snapshots persona.updated should match snapshot 1`] = `
+{
+  "agent_id": "agt_snapshot_test",
+  "data": {
+    "changes": [
+      {
+        "kind": "E",
+        "lhs": 0.9,
+        "path": [
+          "personality",
+          "traits",
+          "helpfulness",
+        ],
+        "rhs": 0.95,
+      },
+      {
+        "kind": "E",
+        "lhs": 0.7,
+        "path": [
+          "personality",
+          "traits",
+          "formality",
+        ],
+        "rhs": 0.8,
+      },
+      {
+        "kind": "E",
+        "lhs": "1.0.0",
+        "path": [
+          "version",
+        ],
+        "rhs": "1.1.0",
+      },
+    ],
+    "persona": {
+      "constraints": {
+        "forbidden_topics": [
+          "politics",
+          "religion",
+        ],
+        "max_response_length": 2000,
+      },
+      "guardrails": {
+        "hallucination_tolerance": "strict",
+        "toxicity_threshold": 0.3,
+      },
+      "personality": {
+        "traits": {
+          "formality": 0.8,
+          "helpfulness": 0.95,
+        },
+      },
+      "version": "1.1.0",
+    },
+    "persona_hash": "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3",
+    "previous_version": "1.0.0",
+    "version": "1.1.0",
+  },
+  "event": "persona.updated",
+  "timestamp": "2025-01-15T12:00:00.000Z",
+}
+`;

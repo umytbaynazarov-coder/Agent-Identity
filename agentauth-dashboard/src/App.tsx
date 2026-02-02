@@ -30,6 +30,12 @@ const WebhooksPage = lazyWithPreload(() =>
 const AnalyticsPage = lazyWithPreload(() =>
   import('./features/analytics/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage }))
 );
+const PersonaPage = lazyWithPreload(() =>
+  import('./features/persona/PersonaPage').then((m) => ({ default: m.PersonaPage }))
+);
+const DriftPage = lazyWithPreload(() =>
+  import('./features/drift/DriftPage').then((m) => ({ default: m.DriftPage }))
+);
 
 // Create a client with optimized caching
 const queryClient = new QueryClient({
@@ -104,6 +110,22 @@ function App() {
                     element={
                       <Suspense fallback={<PageLoader />}>
                         <AnalyticsPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/persona"
+                    element={
+                      <Suspense fallback={<PageLoader />}>
+                        <PersonaPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/drift"
+                    element={
+                      <Suspense fallback={<PageLoader />}>
+                        <DriftPage />
                       </Suspense>
                     }
                   />

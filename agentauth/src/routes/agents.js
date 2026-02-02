@@ -11,22 +11,23 @@ const logger = require('../config/logger');
  * Register a new agent
  */
 router.post('/register', authLimiter, asyncHandler(async (req, res) => {
-  // Validate input
-  const validation = agentValidator.validateRegistration(req.body);
+  // Validate input (async — persona validation loads trait allowlist)
+  const validation = await agentValidator.validateRegistration(req.body);
   if (!validation.valid) {
     throw new APIError('Validation failed', 400, validation.errors);
   }
 
-  // Register agent
+  // Register agent (persona is optional)
   const agent = await agentService.registerAgent(req.body);
 
   logger.info('Agent registered', {
     agent_id: agent.agent_id,
     name: agent.name,
     owner_email: agent.owner_email,
+    has_persona: !!agent.persona,
   });
 
-  res.status(201).json({
+  const response = {
     agent_id: agent.agent_id,
     name: agent.name,
     owner_email: agent.owner_email,
@@ -34,7 +35,14 @@ router.post('/register', authLimiter, asyncHandler(async (req, res) => {
     tier: agent.tier || 'free',
     permissions: agent.permissions,
     created_at: agent.created_at,
-  });
+  };
+
+  if (agent.persona) {
+    response.persona_version = agent.persona_version;
+    response.persona_hash = agent.persona_hash;
+  }
+
+  res.status(201).json(response);
 }));
 
 /**
@@ -90,14 +98,20 @@ router.post('/verify', authLimiter, asyncHandler(async (req, res) => {
     tier: agent.tier,
   });
 
-  res.json({
+  const verifyResponse = {
     valid: true,
     agent_id: agent.agent_id,
     name: agent.name,
     tier: agent.tier || 'free',
     permissions: agent.permissions,
     status: agent.status,
-  });
+  };
+
+  if (agent.persona_valid !== undefined) {
+    verifyResponse.persona_valid = agent.persona_valid;
+  }
+
+  res.json(verifyResponse);
 }));
 
 /**

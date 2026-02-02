@@ -281,4 +281,4 @@ Email us at [support@agentauth.dev](mailto:support@agentauth.dev)
 
 ---
 
-*This SLA is effective as of February 1, 2026 and applies to AgentAuth API v0.5.0 and later.*
+*This SLA is effective as of February 1, 2026 and applies to AgentAuth API v0.7.0 and later.*

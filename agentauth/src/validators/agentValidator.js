@@ -1,3 +1,5 @@
+const personaValidator = require('./personaValidator');
+
 /**
  * Validation functions for agent-related inputs
  */
@@ -5,9 +7,9 @@
 /**
  * Validate agent registration input
  */
-function validateRegistration(data) {
+async function validateRegistration(data) {
   const errors = [];
-  const { name, owner_email, description, permissions } = data;
+  const { name, owner_email, description, permissions, persona } = data;
 
   // Validate name
   if (!name) {
@@ -55,6 +57,14 @@ function validateRegistration(data) {
           break;
         }
       }
+    }
+  }
+
+  // Validate persona (optional — delegate to personaValidator)
+  if (persona !== undefined && persona !== null) {
+    const pResult = await personaValidator.validatePersona(persona);
+    if (!pResult.valid) {
+      errors.push(...pResult.errors);
     }
   }
 

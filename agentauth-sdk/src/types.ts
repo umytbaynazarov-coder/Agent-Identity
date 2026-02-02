@@ -170,12 +170,249 @@ export interface AgentAuthError {
   granted?: Permission[];
 }
 
+// ============================================
+// Persona Types
+// ============================================
+
+export interface PersonaTraits {
+  [key: string]: number | string;
+}
+
+export interface PersonaConstraints {
+  max_response_length?: number;
+  forbidden_topics?: string[];
+  required_disclaimers?: string[];
+  allowed_actions?: string[];
+  blocked_actions?: string[];
+}
+
+export interface PersonaGuardrails {
+  toxicity_threshold?: number;
+  hallucination_tolerance?: 'strict' | 'moderate' | 'lenient';
+  source_citation_required?: boolean;
+}
+
+export interface Persona {
+  version: string;
+  personality?: {
+    traits?: PersonaTraits;
+    assistantAxis?: string[];
+    neuralVectors?: Record<string, number>;
+  };
+  constraints?: PersonaConstraints;
+  guardrails?: PersonaGuardrails;
+  promptTemplate?: string;
+}
+
+export interface PersonaResponse {
+  agent_id: string;
+  persona: Persona;
+  persona_hash: string;
+  persona_version: string;
+  prompt?: string;
+  etag?: string;
+}
+
+export interface PersonaVerifyResponse {
+  valid: boolean;
+  agent_id: string;
+  persona_hash: string;
+  reason: string;
+}
+
+export interface PersonaHistoryEntry {
+  id: string;
+  agent_id: string;
+  persona: Persona;
+  persona_hash: string;
+  persona_version: string;
+  changed_at: string;
+}
+
+export interface PersonaHistoryResponse {
+  history: PersonaHistoryEntry[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface PersonaUpdateResponse extends PersonaResponse {
+  previous_version: string;
+  changes: unknown[];
+}
+
+// ============================================
+// ZKP Types
+// ============================================
+
+export interface RegisterCommitmentRequest {
+  agent_id: string;
+  api_key: string;
+  expires_in?: number;
+}
+
+export interface RegisterCommitmentResponse {
+  commitment: string;
+  salt: string;
+  expires_at: string | null;
+  message: string;
+}
+
+export interface ZKPProof {
+  pi_a: string[];
+  pi_b: string[][];
+  pi_c: string[];
+  protocol?: 'groth16';
+  curve?: string;
+}
+
+export interface VerifyAnonymousRequest {
+  commitment: string;
+  mode?: 'zkp' | 'hash';
+  proof?: ZKPProof;
+  publicSignals?: string[];
+  preimage_hash?: string;
+}
+
+export interface VerifyAnonymousResponse {
+  valid: boolean;
+  permissions?: string[];
+  tier?: string;
+  reason: string;
+}
+
+// ============================================
+// Drift Types
+// ============================================
+
+export interface HealthPingMetrics {
+  [key: string]: number;
+}
+
+export interface HealthPingRequest {
+  metrics: HealthPingMetrics;
+  request_count?: number;
+  period_start?: string;
+  period_end?: string;
+  signature?: string;
+}
+
+export interface AnomalyNote {
+  metric: string;
+  delta: number;
+  threshold: number;
+  mean: number;
+  stddev: number;
+  current_value: number;
+}
+
+export interface HealthPingResponse {
+  ping_id: string;
+  drift_score: number;
+  status: 'ok' | 'warning' | 'revoked';
+  warning?: {
+    action: string;
+    drift_score: number;
+    threshold: number;
+    auto_revoked?: boolean;
+  };
+  anomaly_notes?: AnomalyNote[];
+}
+
+export interface DriftScoreResponse {
+  agent_id: string;
+  drift_score: number | null;
+  message?: string;
+  thresholds: {
+    drift_threshold: number;
+    warning_threshold: number;
+    auto_revoke?: boolean;
+  } | null;
+  trend: Array<{
+    drift_score: number;
+    created_at: string;
+  }>;
+  spike_warnings?: AnomalyNote[];
+}
+
+export interface DriftHistoryEntry {
+  id: string;
+  agent_id: string;
+  drift_score: number;
+  metrics?: HealthPingMetrics;
+  request_count?: number;
+  period_start?: string;
+  period_end?: string;
+  created_at: string;
+}
+
+export interface DriftHistoryResponse {
+  history: DriftHistoryEntry[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface DriftConfig {
+  agent_id: string;
+  drift_threshold: number;
+  warning_threshold: number;
+  auto_revoke: boolean;
+  metric_weights: Record<string, number> | null;
+  baseline_metrics: Record<string, number> | null;
+  spike_sensitivity: number;
+}
+
+// ============================================
+// Custom Errors
+// ============================================
+
+export class PersonaValidationError extends Error {
+  statusCode: number;
+  errors: Array<{ field: string; message: string }>;
+
+  constructor(message: string, errors: Array<{ field: string; message: string }>) {
+    super(message);
+    this.name = 'PersonaValidationError';
+    this.statusCode = 400;
+    this.errors = errors;
+  }
+}
+
+export class DriftThresholdError extends Error {
+  statusCode: number;
+  driftScore: number;
+  threshold: number;
+
+  constructor(message: string, driftScore: number, threshold: number) {
+    super(message);
+    this.name = 'DriftThresholdError';
+    this.statusCode = 409;
+    this.driftScore = driftScore;
+    this.threshold = threshold;
+  }
+}
+
+export class ZKPVerificationError extends Error {
+  statusCode: number;
+  reason: string;
+
+  constructor(message: string, reason: string) {
+    super(message);
+    this.name = 'ZKPVerificationError';
+    this.statusCode = 401;
+    this.reason = reason;
+  }
+}
+
 // HTTP client types
 export interface RequestOptions {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   path: string;
   body?: unknown;
+  params?: Record<string, string | number>;
   requiresAuth?: boolean;
+  headers?: Record<string, string>;
 }
 
 export interface RetryConfig {

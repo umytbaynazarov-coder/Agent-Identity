@@ -1,6 +1,6 @@
 {
   "name": "@umytbaynazarow/agentauth-cli",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "CLI tool for AgentAuth - Setup, test, and deploy agent authentication in minutes",
   "main": "dist/index.js",
   "bin": {

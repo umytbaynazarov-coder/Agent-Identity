@@ -18,6 +18,20 @@ import type {
   PermissionsListResponse,
   HealthCheckResponse,
   RequestOptions,
+  Persona,
+  PersonaResponse,
+  PersonaVerifyResponse,
+  PersonaHistoryResponse,
+  PersonaUpdateResponse,
+  RegisterCommitmentRequest,
+  RegisterCommitmentResponse,
+  VerifyAnonymousRequest,
+  VerifyAnonymousResponse,
+  HealthPingRequest,
+  HealthPingResponse,
+  DriftScoreResponse,
+  DriftHistoryResponse,
+  DriftConfig,
 } from './types';
 import { retryWithBackoff, parseErrorResponse, buildQueryString, validateBaseURL } from './utils';
 
@@ -59,12 +73,14 @@ export class AgentAuthClient {
    * Internal HTTP request method with retry logic
    */
   private async request<T>(options: RequestOptions): Promise<T> {
-    const { method, path, body, requiresAuth = false } = options;
+    const { method, path, body, params, requiresAuth = false, headers: extraHeaders } = options;
 
     const makeRequest = async (): Promise<T> => {
-      const url = `${this.baseURL}${path}`;
+      const query = params ? buildQueryString(params as Record<string, string | number | boolean>) : '';
+      const url = `${this.baseURL}${path}${query}`;
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
+        ...extraHeaders,
       };
 
       if (requiresAuth && this.accessToken) {
@@ -303,6 +319,241 @@ export class AgentAuthClient {
     return this.request<HealthCheckResponse>({
       method: 'GET',
       path: '/health',
+    });
+  }
+
+  // ============================================
+  // Persona ("Soul Layer")
+  // ============================================
+
+  /**
+   * Register a persona for an agent
+   */
+  async registerPersona(
+    agentId: string,
+    persona: Persona,
+  ): Promise<PersonaResponse> {
+    return this.request<PersonaResponse>({
+      method: 'POST',
+      path: `/agents/${agentId}/persona`,
+      body: persona,
+      requiresAuth: true,
+      headers: this.apiKey ? { 'X-Api-Key': this.apiKey } : undefined,
+    });
+  }
+
+  /**
+   * Get persona for an agent. Supports ETag-based caching.
+   */
+  async getPersona(
+    agentId: string,
+    options?: { includePrompt?: boolean; etag?: string },
+  ): Promise<PersonaResponse | null> {
+    const params: Record<string, string | number> = {};
+    if (options?.includePrompt) params.includePrompt = 'true';
+
+    const headers: Record<string, string> = {};
+    if (options?.etag) headers['If-None-Match'] = options.etag;
+
+    return this.request<PersonaResponse>({
+      method: 'GET',
+      path: `/agents/${agentId}/persona`,
+      params: Object.keys(params).length ? params : undefined,
+      headers: Object.keys(headers).length ? headers : undefined,
+    });
+  }
+
+  /**
+   * Get persona version history
+   */
+  async getPersonaHistory(
+    agentId: string,
+    params?: { limit?: number; offset?: number; sort?: 'asc' | 'desc'; format?: 'json' | 'csv' },
+  ): Promise<PersonaHistoryResponse> {
+    return this.request<PersonaHistoryResponse>({
+      method: 'GET',
+      path: `/agents/${agentId}/persona/history`,
+      params: params as Record<string, string | number> | undefined,
+    });
+  }
+
+  /**
+   * Update persona for an agent
+   */
+  async updatePersona(
+    agentId: string,
+    persona: Persona,
+  ): Promise<PersonaUpdateResponse> {
+    return this.request<PersonaUpdateResponse>({
+      method: 'PUT',
+      path: `/agents/${agentId}/persona`,
+      body: persona,
+      requiresAuth: true,
+      headers: this.apiKey ? { 'X-Api-Key': this.apiKey } : undefined,
+    });
+  }
+
+  /**
+   * Verify persona integrity (HMAC check)
+   */
+  async verifyPersona(agentId: string): Promise<PersonaVerifyResponse> {
+    return this.request<PersonaVerifyResponse>({
+      method: 'POST',
+      path: `/agents/${agentId}/persona/verify`,
+      requiresAuth: true,
+      headers: this.apiKey ? { 'X-Api-Key': this.apiKey } : undefined,
+    });
+  }
+
+  /**
+   * Export persona as a signed ZIP bundle (returns URL/blob info)
+   */
+  async exportPersona(agentId: string): Promise<Response> {
+    const query = '';
+    const url = `${this.baseURL}/agents/${agentId}/persona/export${query}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (!response.ok) {
+        await parseErrorResponse(response);
+      }
+      return response;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
+    }
+  }
+
+  /**
+   * Import a persona bundle
+   */
+  async importPersona(
+    agentId: string,
+    bundle: { persona: Persona; persona_hash: string; signature: string },
+  ): Promise<PersonaResponse> {
+    return this.request<PersonaResponse>({
+      method: 'POST',
+      path: `/agents/${agentId}/persona/import`,
+      body: bundle,
+      requiresAuth: true,
+      headers: this.apiKey ? { 'X-Api-Key': this.apiKey } : undefined,
+    });
+  }
+
+  // ============================================
+  // ZKP Anonymous Verification
+  // ============================================
+
+  /**
+   * Register a ZKP commitment for an agent
+   */
+  async registerCommitment(request: RegisterCommitmentRequest): Promise<RegisterCommitmentResponse> {
+    return this.request<RegisterCommitmentResponse>({
+      method: 'POST',
+      path: '/zkp/register-commitment',
+      body: request,
+    });
+  }
+
+  /**
+   * Verify a commitment anonymously (ZKP or hash mode)
+   */
+  async verifyAnonymous(request: VerifyAnonymousRequest): Promise<VerifyAnonymousResponse> {
+    return this.request<VerifyAnonymousResponse>({
+      method: 'POST',
+      path: '/zkp/verify-anonymous',
+      body: request,
+    });
+  }
+
+  // ============================================
+  // Anti-Drift Vault
+  // ============================================
+
+  /**
+   * Submit a health ping with metrics
+   */
+  async submitHealthPing(
+    agentId: string,
+    ping: HealthPingRequest,
+  ): Promise<HealthPingResponse> {
+    return this.request<HealthPingResponse>({
+      method: 'POST',
+      path: `/drift/${agentId}/health-ping`,
+      body: ping,
+      requiresAuth: true,
+      headers: this.apiKey ? { 'X-Api-Key': this.apiKey } : undefined,
+    });
+  }
+
+  /**
+   * Submit a batch of health pings
+   */
+  async batchSubmitHealthPings(
+    agentId: string,
+    pings: HealthPingRequest[],
+  ): Promise<HealthPingResponse[]> {
+    const results: HealthPingResponse[] = [];
+    for (const ping of pings) {
+      const result = await this.submitHealthPing(agentId, ping);
+      results.push(result);
+    }
+    return results;
+  }
+
+  /**
+   * Get current drift score, thresholds, trend, and spike warnings
+   */
+  async getDriftScore(agentId: string): Promise<DriftScoreResponse> {
+    return this.request<DriftScoreResponse>({
+      method: 'GET',
+      path: `/drift/${agentId}/drift-score`,
+    });
+  }
+
+  /**
+   * Get drift history with pagination and filtering
+   */
+  async getDriftHistory(
+    agentId: string,
+    params?: { limit?: number; offset?: number; from?: string; to?: string; sort?: 'asc' | 'desc'; metric?: string; format?: 'json' | 'csv' },
+  ): Promise<DriftHistoryResponse> {
+    return this.request<DriftHistoryResponse>({
+      method: 'GET',
+      path: `/drift/${agentId}/drift-history`,
+      params: params as Record<string, string | number> | undefined,
+    });
+  }
+
+  /**
+   * Configure drift thresholds, weights, and spike sensitivity
+   */
+  async configureDrift(
+    agentId: string,
+    config: Partial<Omit<DriftConfig, 'agent_id'>>,
+  ): Promise<DriftConfig> {
+    return this.request<DriftConfig>({
+      method: 'PUT',
+      path: `/drift/${agentId}/drift-config`,
+      body: config,
+      requiresAuth: true,
+      headers: this.apiKey ? { 'X-Api-Key': this.apiKey } : undefined,
+    });
+  }
+
+  /**
+   * Get drift configuration for an agent
+   */
+  async getDriftConfig(agentId: string): Promise<DriftConfig> {
+    return this.request<DriftConfig>({
+      method: 'GET',
+      path: `/drift/${agentId}/drift-config`,
     });
   }
 }

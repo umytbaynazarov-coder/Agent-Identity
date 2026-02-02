@@ -11,6 +11,10 @@ export interface Agent {
   last_verified_at?: string;
   webhook_count?: number;
   metadata?: Record<string, any>;
+  persona?: Record<string, any>;
+  persona_hash?: string;
+  persona_version?: string;
+  zkp_commitment?: string;
 }
 
 export interface VerificationLog {

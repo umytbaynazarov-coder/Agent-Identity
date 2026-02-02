@@ -11,6 +11,9 @@ const { errorHandler, notFoundHandler } = require('./src/middleware/errorHandler
 // Import routes
 const healthRoutes = require('./src/routes/health');
 const agentRoutes = require('./src/routes/agents');
+const personaRoutes = require('./src/routes/persona');
+const zkpRoutes = require('./src/routes/zkp');
+const driftRoutes = require('./src/routes/drift');
 const webhookRoutes = require('./src/routes/webhooks');
 const apiDocsRoutes = require('./src/routes/apiDocs');
 
@@ -71,7 +74,7 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Api-Key'],
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -104,8 +107,11 @@ app.use('/health', healthRoutes);
 // API Documentation (Swagger UI)
 app.use('/api-docs', apiDocsRoutes);
 
-// API v1 routes
+// API v1 routes — drift routes mounted BEFORE generic agents router
+app.use('/v1/drift', driftRoutes);
 app.use('/v1/agents', agentRoutes);
+app.use('/v1/agents/:agent_id/persona', personaRoutes);
+app.use('/v1/zkp', zkpRoutes);
 app.use('/v1/webhooks', webhookRoutes);
 
 // Legacy routes (backwards compatibility - redirect to v1)
@@ -139,12 +145,12 @@ const server = app.listen(PORT, () => {
   logger.info('Server started', {
     port: PORT,
     environment: process.env.NODE_ENV || 'development',
-    version: '0.6.0',
+    version: '0.7.0',
   });
 
   console.log(`
 ╔════════════════════════════════════════════════════╗
-║         AgentAuth API v0.6.0                       ║
+║         AgentAuth API v0.7.0 "Soul Layer"          ║
 ║         Production-Grade Operations              ║
 ╠════════════════════════════════════════════════════╣
 ║  Server running on port ${PORT}                       ║
@@ -161,6 +167,28 @@ const server = app.listen(PORT, () => {
 ║  • POST /v1/webhooks            Create webhook     ║
 ║  • GET  /v1/webhooks/events     List events        ║
 ║                                                    ║
+║  Persona ("Soul Layer") Endpoints:                 ║
+║  • POST /v1/agents/:id/persona         Register    ║
+║  • GET  /v1/agents/:id/persona         Get         ║
+║  • PUT  /v1/agents/:id/persona         Update      ║
+║  • POST /v1/agents/:id/persona/verify  Integrity   ║
+║  • GET  /v1/agents/:id/persona/history History     ║
+║  • GET  /v1/agents/:id/persona/export  Export      ║
+║  • POST /v1/agents/:id/persona/import  Import      ║
+║                                                    ║
+║  ZKP Anonymous Verification:                       ║
+║  • POST /v1/zkp/register-commitment    Register    ║
+║  • POST /v1/zkp/verify-anonymous       Verify      ║
+║  • DEL  /v1/zkp/commitment/:id         Revoke      ║
+║  • GET  /v1/zkp/active-count           Count       ║
+║                                                    ║
+║  Anti-Drift Vault:                                 ║
+║  • POST /v1/drift/:id/health-ping      Ping        ║
+║  • GET  /v1/drift/:id/drift-score      Score       ║
+║  • GET  /v1/drift/:id/drift-history    History     ║
+║  • PUT  /v1/drift/:id/drift-config     Configure   ║
+║  • GET  /v1/drift/:id/drift-config     Get Config  ║
+║                                                    ║
 ║  Features:                                         ║
 ║  • Modular architecture with services/routes       ║
 ║  • Centralized error handling                      ║
@@ -168,6 +196,9 @@ const server = app.listen(PORT, () => {
 ║  • API versioning (v1)                             ║
 ║  • Rate limiting & CORS protection                 ║
 ║  • Interactive API docs (Swagger UI)               ║
+║  • Persona system with HMAC-SHA256 signing         ║
+║  • ZKP anonymous verification (Groth16 + hash)     ║
+║  • Anti-drift vault with spike detection           ║
 ╚════════════════════════════════════════════════════╝
   `);
 });

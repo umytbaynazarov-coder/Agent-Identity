@@ -541,7 +541,7 @@ Schedule maintenance windows (for deployments):
 ```
 Scheduled Maintenance: Tuesday, Feb 10, 2:00-4:00 AM PST
 
-We'll be deploying v0.6.0 with performance improvements.
+We'll be deploying v0.7.0 with performance improvements.
 Expect brief API downtime (~5 minutes).
 Dashboard will remain accessible (read-only mode).
 

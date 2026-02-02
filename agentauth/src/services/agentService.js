@@ -29,31 +29,66 @@ function hashApiKey(apiKey) {
 }
 
 /**
- * Register a new agent
+ * Register a new agent (optionally with persona)
  */
-async function registerAgent({ name, description, owner_email, permissions }) {
+async function registerAgent({ name, description, owner_email, permissions, persona }) {
   const agent_id = generateAgentId();
   const api_key = generateApiKey();
   const api_key_hash = hashApiKey(api_key);
 
+  const row = {
+    agent_id,
+    name,
+    description: description || null,
+    owner_email,
+    api_key_hash,
+    permissions: permissions || ['zendesk:tickets:read'],
+    status: 'active',
+    created_at: new Date().toISOString(),
+    last_verified_at: null,
+  };
+
+  // If persona provided at registration, sign and attach it
+  if (persona) {
+    const personaService = require('./personaService');
+    row.persona = persona;
+    row.persona_hash = personaService.signPersona(persona, api_key);
+    row.persona_version = persona.version || '1.0.0';
+  }
+
   const { data, error } = await supabase
     .from('agents')
-    .insert({
-      agent_id,
-      name,
-      description: description || null,
-      owner_email,
-      api_key_hash,
-      permissions: permissions || ['zendesk:tickets:read'],
-      status: 'active',
-      created_at: new Date().toISOString(),
-      last_verified_at: null,
-    })
+    .insert(row)
     .select()
     .single();
 
   if (error) {
     throw error;
+  }
+
+  // If persona was included, write to history and create drift config
+  if (persona) {
+    await supabase.from('persona_history').insert({
+      agent_id,
+      persona,
+      persona_hash: row.persona_hash,
+      persona_version: row.persona_version,
+    });
+
+    await supabase
+      .from('drift_configs')
+      .upsert({
+        agent_id,
+        drift_threshold: 0.30,
+        warning_threshold: 0.24,
+        metric_weights: {
+          response_adherence: 0.3,
+          constraint_violations: 0.2,
+          toxicity_score: 0.2,
+          hallucination_rate: 0.2,
+          avg_response_length: 0.1,
+        },
+      }, { onConflict: 'agent_id' });
   }
 
   // Return agent data with plain API key (only time it's shown)
@@ -84,7 +119,8 @@ async function findAgentById(agent_id) {
 }
 
 /**
- * Verify agent credentials
+ * Verify agent credentials.
+ * Returns agent data with persona_valid flag if persona exists.
  */
 async function verifyAgent(agent_id, api_key) {
   const api_key_hash = hashApiKey(api_key);
@@ -110,6 +146,12 @@ async function verifyAgent(agent_id, api_key) {
     .from('agents')
     .update({ last_verified_at: new Date().toISOString() })
     .eq('agent_id', agent_id);
+
+  // Check persona integrity if persona exists
+  if (data.persona && data.persona_hash) {
+    const personaService = require('./personaService');
+    data.persona_valid = personaService.verifyPersonaSignature(data.persona, api_key, data.persona_hash);
+  }
 
   return data;
 }

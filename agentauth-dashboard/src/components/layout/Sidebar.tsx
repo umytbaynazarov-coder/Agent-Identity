@@ -5,10 +5,14 @@ import {
   ChartBarIcon,
   BellIcon,
   Cog6ToothIcon,
+  IdentificationIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
   { name: 'Agents', href: '/agents', icon: UserGroupIcon },
+  { name: 'Persona', href: '/persona', icon: IdentificationIcon },
+  { name: 'Anti-Drift', href: '/drift', icon: ShieldCheckIcon },
   { name: 'Activity', href: '/activity', icon: HomeIcon },
   { name: 'Webhooks', href: '/webhooks', icon: BellIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },

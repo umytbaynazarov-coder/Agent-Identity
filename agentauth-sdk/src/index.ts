@@ -43,4 +43,34 @@ export type {
   PermissionsListResponse,
   HealthCheckResponse,
   AgentAuthError,
+  // Persona types
+  Persona,
+  PersonaTraits,
+  PersonaConstraints,
+  PersonaGuardrails,
+  PersonaResponse,
+  PersonaVerifyResponse,
+  PersonaHistoryEntry,
+  PersonaHistoryResponse,
+  PersonaUpdateResponse,
+  // ZKP types
+  RegisterCommitmentRequest,
+  RegisterCommitmentResponse,
+  ZKPProof,
+  VerifyAnonymousRequest,
+  VerifyAnonymousResponse,
+  // Drift types
+  HealthPingMetrics,
+  HealthPingRequest,
+  AnomalyNote,
+  HealthPingResponse,
+  DriftScoreResponse,
+  DriftHistoryEntry,
+  DriftHistoryResponse,
+  DriftConfig,
+} from './types';
+export {
+  PersonaValidationError,
+  DriftThresholdError,
+  ZKPVerificationError,
 } from './types';

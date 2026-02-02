@@ -1,0 +1,14 @@
+{
+  "_comment": "Placeholder verification key. Replace with real key generated from your Groth16 trusted setup.",
+  "_circuit": "AgentAuth commitment circuit: proves knowledge of (agent_id, api_key, salt) such that SHA256(agent_id:api_key:salt) == commitment",
+  "_publicSignals": ["commitment"],
+  "protocol": "groth16",
+  "curve": "bn128",
+  "nPublic": 1,
+  "vk_alpha_1": [],
+  "vk_beta_2": [],
+  "vk_gamma_2": [],
+  "vk_delta_2": [],
+  "vk_alphabeta_12": [],
+  "IC": []
+}

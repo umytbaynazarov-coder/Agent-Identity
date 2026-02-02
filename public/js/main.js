@@ -11,10 +11,12 @@ let demoState = {
 // Tab Switching
 document.addEventListener('DOMContentLoaded', () => {
     initTabs();
+    initSandboxTabs();
     initCopyButtons();
     initDemo();
     initMobileNav();
     initScrollEffects();
+    initFeatureCardTracking();
 });
 
 // Tab functionality
@@ -99,31 +101,32 @@ async function handleRegister() {
     output.textContent = 'Sending request to API...';
     
     try {
-        const response = await fetch(`${API_BASE}/agents/register`, {
+        const response = await fetch(`${API_BASE}/v1/agents/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 name: 'DemoAgent',
+                owner_email: 'demo@agentauth.dev',
                 permissions: ['read', 'write']
             })
         });
         
         const data = await response.json();
-        
+
         if (response.ok) {
             // Store credentials
-            demoState.agentId = data.agent.id;
-            demoState.apiKey = data.agent.apiKey;
-            
+            demoState.agentId = data.agent_id;
+            demoState.apiKey = data.api_key;
+
             // Display result
             output.textContent = JSON.stringify(data, null, 2);
-            
+
             // Enable next step
             document.getElementById('demo-verify').disabled = false;
             document.querySelector('[data-step="2"]').classList.add('active');
-            
+
             // Update button
             btn.textContent = '✓ Agent Registered';
         } else {
@@ -149,32 +152,29 @@ async function handleVerify() {
     output.textContent = 'Authenticating agent...';
     
     try {
-        const response = await fetch(`${API_BASE}/agents/verify`, {
+        const response = await fetch(`${API_BASE}/v1/agents/verify`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                agentId: demoState.agentId,
-                apiKey: demoState.apiKey
+                agent_id: demoState.agentId,
+                api_key: demoState.apiKey
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
-            // Store token
-            demoState.accessToken = data.accessToken;
-            
             // Display result
             output.textContent = JSON.stringify(data, null, 2);
-            
+
             // Enable next step
             document.getElementById('demo-fetch').disabled = false;
             document.querySelector('[data-step="3"]').classList.add('active');
-            
+
             // Update button
-            btn.textContent = '✓ Token Received';
+            btn.textContent = '✓ Identity Verified';
         } else {
             output.textContent = `Error: ${data.error || 'Verification failed'}`;
             btn.disabled = false;
@@ -198,11 +198,8 @@ async function handleFetch() {
     output.textContent = 'Making authenticated request...';
     
     try {
-        const response = await fetch(`${API_BASE}/agents/${demoState.agentId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${demoState.accessToken}`
-            }
+        const response = await fetch(`${API_BASE}/v1/agents/${demoState.agentId}`, {
+            method: 'GET'
         });
         
         const data = await response.json();
@@ -285,8 +282,31 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Analytics (optional - uncomment if using Google Analytics)
-/*
+// Sandbox Tab Switching
+function initSandboxTabs() {
+    const tabButtons = document.querySelectorAll('.sandbox-tab-btn');
+    const tabPanels = document.querySelectorAll('.sandbox-panel');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const target = button.getAttribute('data-sandbox');
+
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            tabPanels.forEach(panel => {
+                panel.classList.remove('active');
+                if (panel.getAttribute('data-sandbox-panel') === target) {
+                    panel.classList.add('active');
+                }
+            });
+
+            trackEvent('Sandbox', 'tab_switch', target);
+        });
+    });
+}
+
+// GA Event Tracking
 function trackEvent(category, action, label) {
     if (typeof gtag !== 'undefined') {
         gtag('event', action, {
@@ -296,10 +316,28 @@ function trackEvent(category, action, label) {
     }
 }
 
-// Track button clicks
-document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
-    btn.addEventListener('click', () => {
-        trackEvent('CTA', 'click', btn.textContent.trim());
+// Track feature card clicks
+function initFeatureCardTracking() {
+    document.querySelectorAll('.feature-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const featureName = card.querySelector('h3')?.textContent || 'unknown';
+            const featureId = card.getAttribute('data-feature') || featureName;
+            trackEvent('Features', 'card_click', featureId);
+        });
     });
-});
-*/
+
+    // Track CTA button clicks
+    document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+        btn.addEventListener('click', () => {
+            trackEvent('CTA', 'click', btn.textContent.trim());
+        });
+    });
+
+    // Track sandbox copy events
+    document.querySelectorAll('.sandbox-panel .copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-copy') || '';
+            trackEvent('Sandbox', 'copy_code', targetId);
+        });
+    });
+}

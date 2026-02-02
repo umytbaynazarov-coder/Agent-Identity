@@ -1,5 +1,167 @@
 # Changelog
 
+## [0.7.0] - 2026-02-01
+
+### "Soul Layer" — Agent Identity, Integrity & Behavioral Trust
+
+v0.7.0 adds three pillars of agent identity: **Persona** (digital soul), **ZKP** (anonymous verification), and **Anti-Drift Vault** (behavioral monitoring). This release also includes comprehensive test coverage (219 passing tests) and full API documentation with OpenAPI spec updated to 35 endpoints.
+
+---
+
+### 🧬 Persona System (Digital Soul)
+
+- **Register, retrieve, update** agent personas with HMAC-SHA256 signing
+- **Persona validator**: semver version, personality traits (0-1 range + allowed strings), guardrails, constraints
+- **Canonicalization** for deterministic hashing (sorted keys, float rounding)
+- **Auto-bumped** semver versioning on update
+- **Version history** tracking
+- **ZIP export/import** for persona bundles
+- **Generated system prompt** templates from persona data
+- **ETag-based caching** (304 Not Modified)
+- **CSV export** for history
+- **New webhook events**: `persona.created`, `persona.updated`
+
+### 🔐 ZKP Anonymous Verification
+
+- **SHA-256 commitment** generation from agent credentials
+- **Hash mode**: fast preimage-based verification
+- **ZKP mode**: Groth16 proof verification via snarkjs
+- **Commitment TTL** with auto-expiry
+- **Commitment revocation**
+- **Verification key caching**
+- **Concurrent cleanup** throttling
+
+### 🛡️ Anti-Drift Vault
+
+- **Health ping ingestion** with metric validation
+- **Weighted drift score** calculation (0.0-1.0)
+- **Standard deviation-based** spike detection with LRU cache
+- **Configurable thresholds** (warning + drift)
+- **Auto-revoke** capability
+- **HMAC ping signature** verification
+- **Drift history** with pagination and CSV export
+- **Single-metric filtering**
+- **New webhook events**: `agent.drift.warning`, `agent.drift.revoked`
+
+### 🖥️ Dashboard Updates
+
+- **Persona Manager** page (JSON editor, integrity verification, version history, export)
+- **Anti-Drift** page (drift gauge, health ping history, threshold configuration)
+- **New TypeScript types** for persona and drift
+- **New API client modules**
+
+### 📦 SDK Updates
+
+- **TypeScript SDK**: 15 new methods (persona, ZKP, drift)
+- **Python SDK**: 15 new methods with type hints
+- Both SDKs bumped to **0.7.0**
+
+### 🧪 Testing (Phase 7)
+
+- **219 passing tests** (up from 56)
+- **Integration tests**: persona (21), ZKP (21), drift (22)
+- **Unit tests**: personaService (31), driftService (23), zkpService (22)
+- **Performance benchmarks**: ZKP latency (<500ms), drift score under load
+- **Snapshot tests**: 4 webhook payload snapshots
+- **E2E test placeholders** for future Cypress/Playwright
+
+### 📚 Documentation (Phase 8)
+
+- **OpenAPI spec** updated to v0.7.0 (2,274 lines, 35 endpoints)
+- **API reference** with cURL/JS/Python examples
+- **Persona JSON schema** reference
+- **ZKP client-side proof** generation guide
+- **"Build a Drift-Proof Agent in 5 Steps"** quickstart
+- **Versioned docs** hosting (`/docs/v0.7.0/api`)
+
+### 🗄️ Database Migration
+
+- **New tables**: `persona_registry`, `persona_history`, `zkp_commitments`, `drift_health_pings`, `drift_config`
+- **New columns on agents**: `persona_hash`, `persona_version`, `drift_score`, `drift_status`
+- **Triggers** for auto-history tracking
+- **Materialized view**: `agent_trust_scores`
+- **Row-level security** policies
+- **Performance indexes**
+
+---
+
+### 🔄 Migration Guide: v0.6 → v0.7
+
+#### Database
+
+```sql
+-- Run the Soul Layer migration
+psql -f migrations/002_soul_layer.sql
+```
+
+#### New Dependencies
+
+```bash
+npm install semver deep-diff archiver lru-cache snarkjs
+```
+
+#### New Environment Variables
+
+None required. `PERSONA_SECRET` defaults to `JWT_SECRET` if not set.
+
+#### New Endpoints (16 total)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/v1/agents/:id/persona` | Register agent persona |
+| `GET` | `/v1/agents/:id/persona` | Get agent persona |
+| `PUT` | `/v1/agents/:id/persona` | Update agent persona |
+| `GET` | `/v1/agents/:id/persona/history` | Get persona version history |
+| `GET` | `/v1/agents/:id/persona/export` | Export persona as ZIP bundle |
+| `POST` | `/v1/agents/:id/persona/import` | Import persona from ZIP bundle |
+| `GET` | `/v1/agents/:id/persona/prompt` | Generate system prompt from persona |
+| `POST` | `/v1/zkp/commit` | Create ZKP commitment |
+| `POST` | `/v1/zkp/verify` | Verify ZKP commitment |
+| `DELETE` | `/v1/zkp/commit/:id` | Revoke commitment |
+| `POST` | `/v1/agents/:id/drift/ping` | Submit health ping |
+| `GET` | `/v1/agents/:id/drift/score` | Get current drift score |
+| `GET` | `/v1/agents/:id/drift/history` | Get drift history |
+| `GET` | `/v1/agents/:id/drift/config` | Get drift configuration |
+| `PUT` | `/v1/agents/:id/drift/config` | Update drift configuration |
+| `GET` | `/v1/agents/:id/drift/export` | Export drift history as CSV |
+
+#### Webhook Events
+
+New events to subscribe to:
+- `persona.created` — Fired when an agent persona is registered
+- `persona.updated` — Fired when an agent persona is updated
+- `agent.drift.warning` — Fired when drift score exceeds warning threshold
+- `agent.drift.revoked` — Fired when drift score triggers auto-revocation
+
+#### SDK Updates
+
+```bash
+# TypeScript
+npm install @agentauth/sdk@0.7.0
+
+# Python
+pip install agentauth==0.7.0
+```
+
+---
+
+### 📦 Dependencies Added
+
+- `semver` ^7.7.3
+- `deep-diff` ^1.0.2
+- `archiver` ^7.0.1
+- `lru-cache` ^11.2.5
+- `snarkjs` ^0.7.6
+
+### ✅ Quality Assurance
+
+- **245 total tests** (219 passing, 26 skipped placeholders)
+- **4 snapshot tests**
+- All integration, unit, performance tests green
+- OpenAPI spec validated
+
+---
+
 ## [0.6.0] - 2026-02-01
 
 ### 📊 Production-Ready Operations & Enterprise Trust

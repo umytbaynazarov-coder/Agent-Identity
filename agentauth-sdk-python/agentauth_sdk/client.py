@@ -16,6 +16,23 @@ from .types import (
     Webhook,
     HealthCheckResponse,
     AgentTier,
+    Persona,
+    PersonaResponse,
+    PersonaVerifyResponse,
+    PersonaHistoryResponse,
+    PersonaHistoryEntry,
+    RegisterCommitmentRequest,
+    RegisterCommitmentResponse,
+    VerifyAnonymousRequest,
+    VerifyAnonymousResponse,
+    HealthPingRequest,
+    HealthPingResponse,
+    DriftScoreResponse,
+    DriftHistoryResponse,
+    DriftHistoryEntry,
+    DriftConfig,
+    AnomalyNote,
+    DriftTrend,
 )
 from .permissions import Permission
 from .utils import retry_with_backoff, validate_base_url, AgentAuthError
@@ -425,6 +442,414 @@ class AgentAuthClient:
         """
         data = await self._request("GET", "/health")
         return HealthCheckResponse(**data)
+
+    # ============================================
+    # Persona ("Soul Layer")
+    # ============================================
+
+    async def register_persona(
+        self,
+        agent_id: str,
+        persona: Dict[str, Any],
+    ) -> PersonaResponse:
+        """
+        Register a persona for an agent.
+
+        Args:
+            agent_id: Agent ID
+            persona: Persona definition dict
+
+        Returns:
+            PersonaResponse with hash and version
+        """
+        headers: Dict[str, str] = {}
+        if self.api_key:
+            headers["X-Api-Key"] = self.api_key
+
+        data = await self._request(
+            "POST",
+            f"/agents/{agent_id}/persona",
+            json=persona,
+            requires_auth=True,
+        )
+        return PersonaResponse(**data)
+
+    async def get_persona(
+        self,
+        agent_id: str,
+        include_prompt: bool = False,
+        etag: Optional[str] = None,
+    ) -> Optional[PersonaResponse]:
+        """
+        Get persona for an agent. Supports ETag-based caching.
+
+        Args:
+            agent_id: Agent ID
+            include_prompt: Whether to include generated prompt
+            etag: Optional ETag for conditional request
+
+        Returns:
+            PersonaResponse or None if not modified (304)
+        """
+        params: Dict[str, Any] = {}
+        if include_prompt:
+            params["includePrompt"] = "true"
+
+        data = await self._request(
+            "GET",
+            f"/agents/{agent_id}/persona",
+            params=params if params else None,
+        )
+        return PersonaResponse(**data)
+
+    async def get_persona_history(
+        self,
+        agent_id: str,
+        limit: int = 10,
+        offset: int = 0,
+        sort: str = "desc",
+        format: str = "json",
+    ) -> PersonaHistoryResponse:
+        """
+        Get persona version history.
+
+        Args:
+            agent_id: Agent ID
+            limit: Number of entries to return
+            offset: Offset for pagination
+            sort: Sort order ('asc' or 'desc')
+            format: Output format ('json' or 'csv')
+
+        Returns:
+            PersonaHistoryResponse with paginated history
+        """
+        data = await self._request(
+            "GET",
+            f"/agents/{agent_id}/persona/history",
+            params={"limit": limit, "offset": offset, "sort": sort, "format": format},
+        )
+        return PersonaHistoryResponse(**data)
+
+    async def update_persona(
+        self,
+        agent_id: str,
+        persona: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """
+        Update persona for an agent. Auto-bumps minor version.
+
+        Args:
+            agent_id: Agent ID
+            persona: Updated persona definition
+
+        Returns:
+            Updated persona with version info and diff
+        """
+        return await self._request(
+            "PUT",
+            f"/agents/{agent_id}/persona",
+            json=persona,
+            requires_auth=True,
+        )
+
+    async def verify_persona(self, agent_id: str) -> PersonaVerifyResponse:
+        """
+        Verify persona integrity (HMAC-SHA256 check).
+
+        Args:
+            agent_id: Agent ID
+
+        Returns:
+            PersonaVerifyResponse with validity status
+        """
+        data = await self._request(
+            "POST",
+            f"/agents/{agent_id}/persona/verify",
+            requires_auth=True,
+        )
+        return PersonaVerifyResponse(**data)
+
+    async def export_persona(self, agent_id: str) -> bytes:
+        """
+        Export persona as a signed ZIP bundle.
+
+        Args:
+            agent_id: Agent ID
+
+        Returns:
+            ZIP file bytes
+        """
+        client = self._get_client()
+        url = f"{self.base_url}/agents/{agent_id}/persona/export"
+        response = await client.get(url)
+        response.raise_for_status()
+        return response.content
+
+    async def import_persona(
+        self,
+        agent_id: str,
+        bundle: Dict[str, Any],
+    ) -> PersonaResponse:
+        """
+        Import a signed persona bundle.
+
+        Args:
+            agent_id: Agent ID
+            bundle: Bundle with persona, persona_hash, and signature
+
+        Returns:
+            PersonaResponse for the imported persona
+        """
+        data = await self._request(
+            "POST",
+            f"/agents/{agent_id}/persona/import",
+            json=bundle,
+            requires_auth=True,
+        )
+        return PersonaResponse(**data)
+
+    # ============================================
+    # ZKP Anonymous Verification
+    # ============================================
+
+    async def register_commitment(
+        self,
+        agent_id: str,
+        api_key: str,
+        expires_in: Optional[int] = None,
+    ) -> RegisterCommitmentResponse:
+        """
+        Register a ZKP commitment for an agent.
+
+        Args:
+            agent_id: Agent ID
+            api_key: API key
+            expires_in: Optional TTL in seconds
+
+        Returns:
+            RegisterCommitmentResponse with commitment and salt (shown once)
+        """
+        body: Dict[str, Any] = {"agent_id": agent_id, "api_key": api_key}
+        if expires_in is not None:
+            body["expires_in"] = expires_in
+
+        data = await self._request(
+            "POST",
+            "/zkp/register-commitment",
+            json=body,
+        )
+        return RegisterCommitmentResponse(**data)
+
+    async def verify_anonymous(
+        self,
+        commitment: str,
+        mode: str = "zkp",
+        proof: Optional[Dict[str, Any]] = None,
+        public_signals: Optional[List[str]] = None,
+        preimage_hash: Optional[str] = None,
+    ) -> VerifyAnonymousResponse:
+        """
+        Verify a commitment anonymously (ZKP or hash mode).
+
+        Args:
+            commitment: The commitment hash
+            mode: Verification mode ('zkp' or 'hash')
+            proof: Groth16 proof object (for ZKP mode)
+            public_signals: Public signals array (for ZKP mode)
+            preimage_hash: Preimage hash (for hash mode)
+
+        Returns:
+            VerifyAnonymousResponse with validity and permissions
+        """
+        body: Dict[str, Any] = {"commitment": commitment, "mode": mode}
+        if proof is not None:
+            body["proof"] = proof
+        if public_signals is not None:
+            body["publicSignals"] = public_signals
+        if preimage_hash is not None:
+            body["preimage_hash"] = preimage_hash
+
+        data = await self._request(
+            "POST",
+            "/zkp/verify-anonymous",
+            json=body,
+        )
+        return VerifyAnonymousResponse(**data)
+
+    # ============================================
+    # Anti-Drift Vault
+    # ============================================
+
+    async def submit_health_ping(
+        self,
+        agent_id: str,
+        metrics: Dict[str, float],
+        request_count: Optional[int] = None,
+        period_start: Optional[str] = None,
+        period_end: Optional[str] = None,
+        signature: Optional[str] = None,
+    ) -> HealthPingResponse:
+        """
+        Submit a health ping with metrics.
+
+        Args:
+            agent_id: Agent ID
+            metrics: Dict of metric name to value
+            request_count: Optional request count for the period
+            period_start: Optional ISO date for period start
+            period_end: Optional ISO date for period end
+            signature: Optional HMAC signature of the ping data
+
+        Returns:
+            HealthPingResponse with drift score and status
+        """
+        body: Dict[str, Any] = {"metrics": metrics}
+        if request_count is not None:
+            body["request_count"] = request_count
+        if period_start is not None:
+            body["period_start"] = period_start
+        if period_end is not None:
+            body["period_end"] = period_end
+        if signature is not None:
+            body["signature"] = signature
+
+        data = await self._request(
+            "POST",
+            f"/drift/{agent_id}/health-ping",
+            json=body,
+            requires_auth=True,
+        )
+        return HealthPingResponse(**data)
+
+    async def batch_submit_health_pings(
+        self,
+        agent_id: str,
+        pings: List[Dict[str, Any]],
+    ) -> List[HealthPingResponse]:
+        """
+        Submit a batch of health pings.
+
+        Args:
+            agent_id: Agent ID
+            pings: List of ping data dicts (each with metrics, etc.)
+
+        Returns:
+            List of HealthPingResponse for each ping
+        """
+        results = []
+        for ping in pings:
+            result = await self.submit_health_ping(
+                agent_id=agent_id,
+                metrics=ping["metrics"],
+                request_count=ping.get("request_count"),
+                period_start=ping.get("period_start"),
+                period_end=ping.get("period_end"),
+                signature=ping.get("signature"),
+            )
+            results.append(result)
+        return results
+
+    async def get_drift_score(self, agent_id: str) -> DriftScoreResponse:
+        """
+        Get current drift score, thresholds, trend, and spike warnings.
+
+        Args:
+            agent_id: Agent ID
+
+        Returns:
+            DriftScoreResponse with score and trend data
+        """
+        data = await self._request(
+            "GET",
+            f"/drift/{agent_id}/drift-score",
+        )
+        return DriftScoreResponse(**data)
+
+    async def get_drift_history(
+        self,
+        agent_id: str,
+        limit: int = 20,
+        offset: int = 0,
+        from_date: Optional[str] = None,
+        to_date: Optional[str] = None,
+        sort: str = "desc",
+        metric: Optional[str] = None,
+        format: str = "json",
+    ) -> DriftHistoryResponse:
+        """
+        Get drift history with pagination, date range, and filtering.
+
+        Args:
+            agent_id: Agent ID
+            limit: Number of entries to return
+            offset: Offset for pagination
+            from_date: Optional start date (ISO)
+            to_date: Optional end date (ISO)
+            sort: Sort order ('asc' or 'desc')
+            metric: Optional single metric to filter
+            format: Output format ('json' or 'csv')
+
+        Returns:
+            DriftHistoryResponse with paginated history
+        """
+        params: Dict[str, Any] = {
+            "limit": limit,
+            "offset": offset,
+            "sort": sort,
+            "format": format,
+        }
+        if from_date:
+            params["from"] = from_date
+        if to_date:
+            params["to"] = to_date
+        if metric:
+            params["metric"] = metric
+
+        data = await self._request(
+            "GET",
+            f"/drift/{agent_id}/drift-history",
+            params=params,
+        )
+        return DriftHistoryResponse(**data)
+
+    async def configure_drift(
+        self,
+        agent_id: str,
+        config: Dict[str, Any],
+    ) -> DriftConfig:
+        """
+        Configure drift thresholds, weights, and spike sensitivity.
+
+        Args:
+            agent_id: Agent ID
+            config: Configuration dict with threshold, weights, etc.
+
+        Returns:
+            DriftConfig with updated configuration
+        """
+        data = await self._request(
+            "PUT",
+            f"/drift/{agent_id}/drift-config",
+            json=config,
+            requires_auth=True,
+        )
+        return DriftConfig(**data)
+
+    async def get_drift_config(self, agent_id: str) -> DriftConfig:
+        """
+        Get drift configuration for an agent.
+
+        Args:
+            agent_id: Agent ID
+
+        Returns:
+            DriftConfig for the agent
+        """
+        data = await self._request(
+            "GET",
+            f"/drift/{agent_id}/drift-config",
+        )
+        return DriftConfig(**data)
 
     async def close(self) -> None:
         """Close the HTTP client"""

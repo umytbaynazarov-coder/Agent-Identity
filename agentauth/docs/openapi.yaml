@@ -1,21 +1,24 @@
 openapi: 3.1.0
 info:
   title: AgentAuth API
-  version: 0.6.0
+  version: 0.7.0
   description: |
-    **AgentAuth** is a production-ready authentication service for AI agents.
+    **AgentAuth** is a production-ready authentication and identity service for AI agents.
 
     ## Features
-    - 🔐 JWT-based authentication
-    - 🚦 Rate limiting (100 req/15min general, 10 req/15min auth)
-    - 🔔 Webhooks for events
-    - 📊 Activity logging
-    - 🎯 Permission-based access control
+    - JWT-based authentication
+    - Rate limiting (100 req/15min general, 10 req/15min auth)
+    - Webhooks for events
+    - Activity logging
+    - Permission-based access control
+    - **Persona System** — define and manage an agent's digital soul (v0.7.0)
+    - **ZKP Anonymous Verification** — prove identity without revealing credentials (v0.7.0)
+    - **Anti-Drift Vault** — detect behavioral drift and auto-revoke rogue agents (v0.7.0)
 
     ## Authentication
-    Most endpoints require Bearer token authentication. Include your API key in the `Authorization` header:
+    Most endpoints require an API key in the `X-Api-Key` header:
     ```
-    Authorization: Bearer ag_your_api_key_here
+    X-Api-Key: ag_sk_your_api_key_here
     ```
 
     ## Rate Limits
@@ -29,7 +32,6 @@ info:
 
     ## Base URL
     - **Production**: `https://api.agentauth.dev`
-    - **Staging**: `https://staging-api.agentauth.dev`
     - **Local**: `http://localhost:3000`
 
   contact:
@@ -51,10 +53,25 @@ tags:
     description: Health check endpoints
   - name: Agents
     description: Agent registration, verification, and management
+  - name: Persona
+    description: |
+      Persona ("Soul Layer") — define, version, and cryptographically sign an agent's
+      behavioral identity. Includes HMAC-SHA256 integrity verification, version history,
+      and ZIP export/import.
+  - name: ZKP
+    description: |
+      Zero-Knowledge Proof anonymous verification. Agents can prove they hold valid
+      credentials without revealing their identity. Supports Groth16 proof mode and
+      fast hash-based mode.
+  - name: Drift
+    description: |
+      Anti-Drift Vault — monitor agent behavioral metrics over time, detect drift from
+      baseline, fire warnings, and auto-revoke agents that exceed thresholds.
   - name: Webhooks
     description: Webhook configuration and delivery tracking
 
 paths:
+  # ─── Health ──────────────────────────────────────────────────────────────────
   /health:
     get:
       summary: Health check
@@ -72,8 +89,8 @@ paths:
               example:
                 status: healthy
                 service: AgentAuth API
-                version: 0.6.0
-                timestamp: '2026-01-31T12:00:00.000Z'
+                version: 0.7.0
+                timestamp: '2026-02-01T12:00:00.000Z'
                 checks:
                   database: healthy
         '503':
@@ -85,11 +102,12 @@ paths:
               example:
                 status: unhealthy
                 service: AgentAuth API
-                version: 0.6.0
-                timestamp: '2026-01-31T12:00:00.000Z'
+                version: 0.7.0
+                timestamp: '2026-02-01T12:00:00.000Z'
                 checks:
                   database: unhealthy
 
+  # ─── Agents ──────────────────────────────────────────────────────────────────
   /v1/agents/register:
     post:
       summary: Register a new agent
@@ -138,7 +156,7 @@ paths:
                 permissions:
                   - read:messages
                   - write:responses
-                created_at: '2026-01-31T12:00:00.000Z'
+                created_at: '2026-02-01T12:00:00.000Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '429':
@@ -244,14 +262,8 @@ paths:
                     owner_email: admin@company.com
                     tier: free
                     status: active
-                    created_at: '2026-01-31T12:00:00.000Z'
-                  - agent_id: ag_2b3c4d5e6f7g
-                    name: SalesAgent
-                    owner_email: sales@company.com
-                    tier: pro
-                    status: active
-                    created_at: '2026-01-30T10:00:00.000Z'
-                total: 2
+                    created_at: '2026-02-01T12:00:00.000Z'
+                total: 1
                 limit: 50
                 offset: 0
         '500':
@@ -273,17 +285,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Agent'
-              example:
-                agent_id: ag_1a2b3c4d5e6f
-                name: CustomerSupportAgent
-                owner_email: admin@company.com
-                tier: free
-                permissions:
-                  - read:messages
-                  - write:responses
-                status: active
-                created_at: '2026-01-31T12:00:00.000Z'
-                updated_at: '2026-01-31T12:00:00.000Z'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -355,10 +356,6 @@ paths:
                   updated_at:
                     type: string
                     format: date-time
-              example:
-                agent_id: ag_1a2b3c4d5e6f
-                tier: pro
-                updated_at: '2026-01-31T12:05:00.000Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -404,10 +401,6 @@ paths:
                   updated_at:
                     type: string
                     format: date-time
-              example:
-                agent_id: ag_1a2b3c4d5e6f
-                status: suspended
-                updated_at: '2026-01-31T12:10:00.000Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -458,13 +451,6 @@ paths:
                   updated_at:
                     type: string
                     format: date-time
-              example:
-                agent_id: ag_1a2b3c4d5e6f
-                permissions:
-                  - read:messages
-                  - write:responses
-                  - delete:messages
-                updated_at: '2026-01-31T12:15:00.000Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -516,28 +502,728 @@ paths:
                     type: integer
                   offset:
                     type: integer
-              example:
-                logs:
-                  - id: log_1a2b3c4d
-                    agent_id: ag_1a2b3c4d5e6f
-                    success: true
-                    reason: Valid credentials
-                    ip_address: 203.0.113.42
-                    timestamp: '2026-01-31T12:00:00.000Z'
-                  - id: log_2b3c4d5e
-                    agent_id: ag_1a2b3c4d5e6f
-                    success: false
-                    reason: Invalid credentials
-                    ip_address: 203.0.113.99
-                    timestamp: '2026-01-31T11:55:00.000Z'
-                total: 2
-                limit: 100
-                offset: 0
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  # ─── Persona (Soul Layer) ────────────────────────────────────────────────────
+  /v1/agents/{agent_id}/persona:
+    post:
+      summary: Register persona
+      description: |
+        Register a new persona (digital soul) for an agent. The persona is signed
+        with HMAC-SHA256 using the agent's API key, creating a tamper-proof identity.
+
+        Fires a `persona.created` webhook event.
+      operationId: registerPersona
+      tags:
+        - Persona
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonaRegistrationRequest'
+            example:
+              persona:
+                version: '1.0.0'
+                personality:
+                  traits:
+                    helpfulness: 0.9
+                    formality: 0.7
+                guardrails:
+                  toxicity_threshold: 0.3
+                  hallucination_tolerance: strict
+                constraints:
+                  forbidden_topics:
+                    - politics
+                    - religion
+                  max_response_length: 2000
+      responses:
+        '201':
+          description: Persona registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonaResponse'
+              example:
+                agent_id: ag_1a2b3c4d5e6f
+                persona_version: '1.0.0'
+                persona_hash: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+                created_at: '2026-02-01T12:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Persona already exists for this agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Conflict
+                message: Persona already registered. Use PUT to update.
+        '413':
+          description: Persona exceeds 10KB size limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Payload Too Large
+                message: Persona validation failed
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      summary: Get persona
+      description: |
+        Retrieve the current persona for an agent. Supports ETag-based caching
+        via `If-None-Match` header.
+
+        Add `?include_prompt=true` to include the auto-generated system prompt.
+      operationId: getPersona
+      tags:
+        - Persona
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - name: include_prompt
+          in: query
+          description: Include generated system prompt template
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: If-None-Match
+          in: header
+          description: ETag from a previous response for conditional caching
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Persona retrieved
+          headers:
+            ETag:
+              description: Hash-based ETag for caching
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonaFullResponse'
+              example:
+                agent_id: ag_1a2b3c4d5e6f
+                persona:
+                  version: '1.0.0'
+                  personality:
+                    traits:
+                      helpfulness: 0.9
+                      formality: 0.7
+                persona_version: '1.0.0'
+                persona_hash: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+                prompt: 'You are an AI agent with the following persona...'
+        '304':
+          description: Not modified (ETag match)
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      summary: Update persona
+      description: |
+        Update an existing persona. The version is auto-bumped (minor) unless a
+        higher explicit version is provided. Fires a `persona.updated` webhook.
+      operationId: updatePersona
+      tags:
+        - Persona
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonaRegistrationRequest'
+      responses:
+        '200':
+          description: Persona updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/agents/{agent_id}/persona/verify:
+    post:
+      summary: Verify persona integrity
+      description: |
+        Re-compute the HMAC-SHA256 hash of the stored persona and compare it with
+        the stored hash. Detects any tampering of the persona data at rest.
+      operationId: verifyPersonaIntegrity
+      tags:
+        - Persona
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Integrity check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonaVerifyResponse'
+              example:
+                valid: true
+                reason: Hash matches stored persona
+                agent_id: ag_1a2b3c4d5e6f
+                persona_version: '1.0.0'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/agents/{agent_id}/persona/history:
+    get:
+      summary: Get persona version history
+      description: |
+        Retrieve the version history of persona changes for an agent.
+        Supports pagination and CSV export via `?format=csv`.
+      operationId: getPersonaHistory
+      tags:
+        - Persona
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - name: limit
+          in: query
+          description: Maximum entries to return
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: Number of entries to skip
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: format
+          in: query
+          description: Response format
+          schema:
+            type: string
+            enum: [json, csv]
+            default: json
+      responses:
+        '200':
+          description: Persona version history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonaHistoryResponse'
+              example:
+                history:
+                  - id: 1
+                    persona_version: '1.1.0'
+                    persona_hash: a1b2c3d4...
+                    changed_at: '2026-02-01T14:00:00.000Z'
+                  - id: 0
+                    persona_version: '1.0.0'
+                    persona_hash: e5f6a1b2...
+                    changed_at: '2026-02-01T12:00:00.000Z'
+                total: 2
+            text/csv:
+              schema:
+                type: string
+              example: |
+                version,hash,changed_at
+                1.1.0,a1b2c3d4...,2026-02-01T14:00:00.000Z
+                1.0.0,e5f6a1b2...,2026-02-01T12:00:00.000Z
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/agents/{agent_id}/persona/export:
+    get:
+      summary: Export persona bundle
+      description: |
+        Download a ZIP archive containing the persona JSON, metadata, and
+        integrity hash. Useful for backup or importing to another agent.
+      operationId: exportPersona
+      tags:
+        - Persona
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Persona bundle ZIP
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/agents/{agent_id}/persona/import:
+    post:
+      summary: Import persona bundle
+      description: |
+        Import a persona from a previously exported bundle. The persona
+        will be re-signed with the target agent's API key.
+      operationId: importPersona
+      tags:
+        - Persona
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                bundle:
+                  type: string
+                  format: binary
+                  description: ZIP file from persona export
+      responses:
+        '201':
+          description: Persona imported successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── ZKP Anonymous Verification ──────────────────────────────────────────────
+  /v1/zkp/register-commitment:
+    post:
+      summary: Register ZKP commitment
+      description: |
+        Generate and store a SHA-256 commitment for anonymous verification.
+        Requires valid agent credentials (agent_id + api_key in body).
+
+        The returned `salt` is only shown once. Store it securely.
+      operationId: registerCommitment
+      tags:
+        - ZKP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommitmentRegistrationRequest'
+            example:
+              agent_id: ag_1a2b3c4d5e6f
+              api_key: ag_sk_1a2b3c4d5e6f7g8h9i0j
+              expires_in: 86400
+      responses:
+        '201':
+          description: Commitment registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitmentRegistrationResponse'
+              example:
+                commitment: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+                salt: f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2
+                expires_at: '2026-02-02T12:00:00.000Z'
+                message: Store the salt securely — it will not be shown again.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/zkp/verify-anonymous:
+    post:
+      summary: Verify anonymously
+      description: |
+        Verify a commitment without revealing agent identity.
+
+        **Hash mode** (`?mode=hash`): Provide `preimage_hash` — the SHA-256 of
+        `agentId:apiKey:salt`. Fast, no cryptographic proof required.
+
+        **ZKP mode** (`?mode=zkp`, default): Provide a Groth16 proof and
+        publicSignals. The first public signal must equal the commitment.
+      operationId: verifyAnonymous
+      tags:
+        - ZKP
+      parameters:
+        - name: mode
+          in: query
+          description: Verification mode
+          required: false
+          schema:
+            type: string
+            enum: [zkp, hash]
+            default: zkp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/ZKPVerificationRequest'
+                - $ref: '#/components/schemas/HashVerificationRequest'
+            examples:
+              zkp_mode:
+                summary: ZKP mode with Groth16 proof
+                value:
+                  commitment: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+                  proof:
+                    pi_a: ['0x1234...', '0x5678...', '1']
+                    pi_b: [['0xabcd...', '0xef01...'], ['0x2345...', '0x6789...']]
+                    pi_c: ['0xaaaa...', '0xbbbb...', '1']
+                  publicSignals:
+                    - a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+              hash_mode:
+                summary: Hash mode with preimage
+                value:
+                  commitment: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+                  preimage_hash: abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234
+      responses:
+        '200':
+          description: Verification result
+          headers:
+            Cache-Control:
+              description: no-store to prevent caching of verification results
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnonymousVerificationResponse'
+              examples:
+                valid:
+                  value:
+                    valid: true
+                    reason: Commitment verified via hash mode
+                    permissions:
+                      - read
+                      - write
+                    tier: pro
+                invalid:
+                  value:
+                    valid: false
+                    reason: Preimage hash does not match commitment
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/zkp/commitment/{commitment}:
+    delete:
+      summary: Revoke commitment
+      description: Mark a commitment as revoked so it can no longer be used for verification.
+      operationId: revokeCommitment
+      tags:
+        - ZKP
+      parameters:
+        - name: commitment
+          in: path
+          description: The commitment hex string to revoke
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9a-f]{64,256}$'
+      responses:
+        '200':
+          description: Commitment revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  commitment:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: Commitment revoked
+                commitment: a1b2c3d4...
+                status: revoked
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/zkp/active-count:
+    get:
+      summary: Count active commitments
+      description: Return the number of currently active (non-revoked, non-expired) commitments.
+      operationId: getActiveCommitmentCount
+      tags:
+        - ZKP
+      responses:
+        '200':
+          description: Active commitment count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+              example:
+                count: 42
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── Drift (Anti-Drift Vault) ───────────────────────────────────────────────
+  /v1/drift/{agent_id}/health-ping:
+    post:
+      summary: Submit health ping
+      description: |
+        Submit a health ping with behavioral metrics for an agent. The drift score
+        is computed against the configured baseline. If the score exceeds thresholds,
+        warnings are fired and agents may be auto-revoked.
+
+        Requires `X-Api-Key` header and optionally `X-Ping-Signature` for HMAC
+        verification of the ping payload.
+      operationId: submitHealthPing
+      tags:
+        - Drift
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HealthPingRequest'
+            example:
+              metrics:
+                response_time: 0.45
+                error_rate: 0.02
+                toxicity_score: 0.05
+                hallucination_rate: 0.01
+                request_count: 150
+              request_count: 150
+              period_start: '2026-02-01T11:00:00.000Z'
+              period_end: '2026-02-01T12:00:00.000Z'
+      responses:
+        '201':
+          description: Health ping recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthPingResponse'
+              example:
+                ping_id: 1
+                agent_id: ag_1a2b3c4d5e6f
+                drift_score: 0.12
+                spikes: []
+                status: healthy
+                message: Health ping recorded
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Agent is inactive or revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/drift/{agent_id}/drift-score:
+    get:
+      summary: Get drift score
+      description: |
+        Retrieve the current drift score and trend for an agent. The score is
+        a weighted average of metric deltas from baseline (0.0 = no drift, 1.0 = max drift).
+      operationId: getDriftScore
+      tags:
+        - Drift
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Current drift score
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriftScoreResponse'
+              example:
+                agent_id: ag_1a2b3c4d5e6f
+                drift_score: 0.12
+                trend: improving
+                last_ping_at: '2026-02-01T12:00:00.000Z'
+                status: healthy
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/drift/{agent_id}/drift-history:
+    get:
+      summary: Get drift history
+      description: |
+        Retrieve paginated drift score history for an agent.
+        Supports CSV export and single-metric filtering.
+      operationId: getDriftHistory
+      tags:
+        - Drift
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - name: limit
+          in: query
+          description: Maximum entries to return
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 200
+        - name: offset
+          in: query
+          description: Number of entries to skip
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: metric
+          in: query
+          description: Filter by a single metric name
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Response format
+          schema:
+            type: string
+            enum: [json, csv]
+            default: json
+      responses:
+        '200':
+          description: Drift score history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriftHistoryResponse'
+            text/csv:
+              schema:
+                type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/drift/{agent_id}/drift-config:
+    put:
+      summary: Update drift configuration
+      description: |
+        Configure drift thresholds, metric weights, auto-revoke behavior,
+        spike sensitivity, and baseline metrics for an agent.
+      operationId: updateDriftConfig
+      tags:
+        - Drift
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriftConfigRequest'
+            example:
+              drift_threshold: 0.7
+              warning_threshold: 0.5
+              auto_revoke: true
+              spike_sensitivity: 2.0
+              metric_weights:
+                toxicity_score: 3.0
+                hallucination_rate: 2.0
+                error_rate: 1.0
+              baseline_metrics:
+                response_time: 0.3
+                error_rate: 0.01
+                toxicity_score: 0.02
+      responses:
+        '200':
+          description: Configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriftConfigResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      summary: Get drift configuration
+      description: Retrieve the current drift configuration for an agent.
+      operationId: getDriftConfig
+      tags:
+        - Drift
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Drift configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriftConfigResponse'
+              example:
+                agent_id: ag_1a2b3c4d5e6f
+                drift_threshold: 0.7
+                warning_threshold: 0.5
+                auto_revoke: true
+                spike_sensitivity: 2.0
+                metric_weights:
+                  toxicity_score: 3.0
+                  hallucination_rate: 2.0
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── Webhooks ────────────────────────────────────────────────────────────────
   /v1/webhooks:
     post:
       summary: Create webhook
@@ -556,8 +1242,10 @@ paths:
               url: https://api.yourapp.com/webhooks/agentauth
               events:
                 - agent.verified
-                - agent.verification_failed
-                - agent.tier_updated
+                - persona.created
+                - persona.updated
+                - agent.drift.warning
+                - agent.drift.revoked
       responses:
         '201':
           description: Webhook created successfully
@@ -565,17 +1253,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Webhook'
-              example:
-                id: wh_1a2b3c4d5e6f
-                agent_id: ag_1a2b3c4d5e6f
-                url: https://api.yourapp.com/webhooks/agentauth
-                events:
-                  - agent.verified
-                  - agent.verification_failed
-                  - agent.tier_updated
-                secret: whsec_1a2b3c4d5e6f7g8h
-                is_active: true
-                created_at: '2026-01-31T12:00:00.000Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
@@ -607,16 +1284,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Webhook'
-              example:
-                webhooks:
-                  - id: wh_1a2b3c4d5e6f
-                    agent_id: ag_1a2b3c4d5e6f
-                    url: https://api.yourapp.com/webhooks/agentauth
-                    events:
-                      - agent.verified
-                      - agent.verification_failed
-                    is_active: true
-                    created_at: '2026-01-31T12:00:00.000Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
@@ -625,7 +1292,7 @@ paths:
   /v1/webhooks/events:
     get:
       summary: List available webhook events
-      description: Get a list of all available webhook event types
+      description: Get a list of all available webhook event types including Soul Layer events
       operationId: listWebhookEvents
       tags:
         - Webhooks
@@ -650,6 +1317,10 @@ paths:
                   - agent.status_updated
                   - agent.permissions_updated
                   - agent.deleted
+                  - persona.created
+                  - persona.updated
+                  - agent.drift.warning
+                  - agent.drift.revoked
 
   /v1/webhooks/{webhook_id}:
     get:
@@ -686,11 +1357,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/WebhookUpdateRequest'
-            example:
-              url: https://api.yourapp.com/webhooks/agentauth-v2
-              events:
-                - agent.verified
-                - agent.tier_updated
       responses:
         '200':
           description: Webhook updated successfully
@@ -725,9 +1391,6 @@ paths:
                     type: boolean
                   message:
                     type: string
-              example:
-                success: true
-                message: Webhook deleted successfully
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -756,10 +1419,6 @@ paths:
                     type: string
                   message:
                     type: string
-              example:
-                webhook_id: wh_1a2b3c4d5e6f
-                secret: whsec_2c3d4e5f6g7h8i
-                message: Secret regenerated successfully
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -845,32 +1504,22 @@ paths:
                     type: integer
                   offset:
                     type: integer
-              example:
-                deliveries:
-                  - id: del_1a2b3c4d
-                    webhook_id: wh_1a2b3c4d5e6f
-                    event: agent.verified
-                    status: success
-                    status_code: 200
-                    response_time_ms: 145
-                    timestamp: '2026-01-31T12:00:00.000Z'
-                  - id: del_2b3c4d5e
-                    webhook_id: wh_1a2b3c4d5e6f
-                    event: agent.tier_updated
-                    status: failed
-                    status_code: 500
-                    response_time_ms: 30000
-                    error: Connection timeout
-                    timestamp: '2026-01-31T11:55:00.000Z'
-                total: 2
-                limit: 50
-                offset: 0
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Components
+# ═══════════════════════════════════════════════════════════════════════════════
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: Agent API key
+
   parameters:
     AgentId:
       name: agent_id
@@ -912,14 +1561,10 @@ components:
       example: 1738329600
 
   schemas:
+    # ─── Core Schemas ────────────────────────────────────────────────────────
     HealthResponse:
       type: object
-      required:
-        - status
-        - service
-        - version
-        - timestamp
-        - checks
+      required: [status, service, version, timestamp, checks]
       properties:
         status:
           type: string
@@ -940,9 +1585,7 @@ components:
 
     AgentRegistrationRequest:
       type: object
-      required:
-        - name
-        - owner_email
+      required: [name, owner_email]
       properties:
         name:
           type: string
@@ -957,24 +1600,16 @@ components:
           type: array
           items:
             type: string
-          description: Permission scopes for the agent
+          description: Permission scopes
           default: []
         tier:
           type: string
           enum: [free, pro, enterprise]
           default: free
-          description: Pricing tier
 
     AgentRegistrationResponse:
       type: object
-      required:
-        - agent_id
-        - name
-        - owner_email
-        - api_key
-        - tier
-        - permissions
-        - created_at
+      required: [agent_id, name, owner_email, api_key, tier, permissions, created_at]
       properties:
         agent_id:
           type: string
@@ -985,7 +1620,7 @@ components:
           format: email
         api_key:
           type: string
-          description: API key (only shown once - save it!)
+          description: API key (only shown once)
         tier:
           type: string
           enum: [free, pro, enterprise]
@@ -999,21 +1634,16 @@ components:
 
     AgentVerificationRequest:
       type: object
-      required:
-        - agent_id
-        - api_key
+      required: [agent_id, api_key]
       properties:
         agent_id:
           type: string
-          pattern: '^ag_[a-zA-Z0-9]+$'
         api_key:
           type: string
-          pattern: '^ag_sk_[a-zA-Z0-9]+$'
 
     AgentVerificationResponse:
       type: object
-      required:
-        - valid
+      required: [valid]
       properties:
         valid:
           type: boolean
@@ -1033,17 +1663,10 @@ components:
           enum: [active, inactive, suspended]
         error:
           type: string
-          description: Error message if valid=false
 
     Agent:
       type: object
-      required:
-        - agent_id
-        - name
-        - owner_email
-        - tier
-        - status
-        - created_at
+      required: [agent_id, name, owner_email, tier, status, created_at]
       properties:
         agent_id:
           type: string
@@ -1061,7 +1684,7 @@ components:
             type: string
         status:
           type: string
-          enum: [active, inactive, suspended]
+          enum: [active, inactive, suspended, revoked]
         created_at:
           type: string
           format: date-time
@@ -1071,11 +1694,7 @@ components:
 
     AgentListResponse:
       type: object
-      required:
-        - agents
-        - total
-        - limit
-        - offset
+      required: [agents, total, limit, offset]
       properties:
         agents:
           type: array
@@ -1090,11 +1709,7 @@ components:
 
     ActivityLog:
       type: object
-      required:
-        - id
-        - agent_id
-        - success
-        - timestamp
+      required: [id, agent_id, success, timestamp]
       properties:
         id:
           type: string
@@ -1110,12 +1725,389 @@ components:
           type: string
           format: date-time
 
+    # ─── Persona Schemas ─────────────────────────────────────────────────────
+    PersonaObject:
+      type: object
+      required: [version]
+      description: |
+        The persona definition — an agent's "digital soul". Max size 10KB.
+        See [Persona Schema Reference](/docs/persona-schema) for full details.
+      properties:
+        version:
+          type: string
+          description: Semantic version (e.g. "1.0.0")
+          pattern: '^\d+\.\d+\.\d+.*$'
+        personality:
+          type: object
+          properties:
+            traits:
+              type: object
+              description: Key-value pairs. Numbers must be 0-1; strings must be from the allowed traits list.
+              additionalProperties:
+                oneOf:
+                  - type: number
+                    minimum: 0
+                    maximum: 1
+                  - type: string
+            assistantAxis:
+              type: array
+              items:
+                type: object
+            neuralVectors:
+              type: object
+        guardrails:
+          type: object
+          properties:
+            toxicity_threshold:
+              type: number
+              minimum: 0
+              maximum: 1
+            hallucination_tolerance:
+              type: string
+              enum: [strict, moderate, lenient]
+            source_citation_required:
+              type: boolean
+        constraints:
+          type: object
+          properties:
+            forbidden_topics:
+              type: array
+              items:
+                type: string
+            required_disclaimers:
+              type: array
+              items:
+                type: string
+            allowed_actions:
+              type: array
+              items:
+                type: string
+            blocked_actions:
+              type: array
+              items:
+                type: string
+            max_response_length:
+              type: integer
+              minimum: 1
+      additionalProperties: true
+
+    PersonaRegistrationRequest:
+      type: object
+      required: [persona]
+      properties:
+        persona:
+          $ref: '#/components/schemas/PersonaObject'
+
+    PersonaResponse:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        persona_version:
+          type: string
+        persona_hash:
+          type: string
+          description: HMAC-SHA256 hex digest (64 chars)
+        created_at:
+          type: string
+          format: date-time
+
+    PersonaFullResponse:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        persona:
+          $ref: '#/components/schemas/PersonaObject'
+        persona_version:
+          type: string
+        persona_hash:
+          type: string
+        prompt:
+          type: string
+          description: Auto-generated system prompt (only with include_prompt=true)
+
+    PersonaVerifyResponse:
+      type: object
+      required: [valid, reason]
+      properties:
+        valid:
+          type: boolean
+        reason:
+          type: string
+        agent_id:
+          type: string
+        persona_version:
+          type: string
+
+    PersonaHistoryEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        persona_version:
+          type: string
+        persona_hash:
+          type: string
+        changed_at:
+          type: string
+          format: date-time
+
+    PersonaHistoryResponse:
+      type: object
+      properties:
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonaHistoryEntry'
+        total:
+          type: integer
+
+    # ─── ZKP Schemas ─────────────────────────────────────────────────────────
+    CommitmentRegistrationRequest:
+      type: object
+      required: [agent_id, api_key]
+      properties:
+        agent_id:
+          type: string
+        api_key:
+          type: string
+        expires_in:
+          type: integer
+          minimum: 1
+          description: TTL in seconds (optional)
+
+    CommitmentRegistrationResponse:
+      type: object
+      properties:
+        commitment:
+          type: string
+          description: 64-char hex SHA-256 commitment
+        salt:
+          type: string
+          description: 64-char hex random salt (shown once)
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        message:
+          type: string
+
+    Groth16Proof:
+      type: object
+      required: [pi_a, pi_b, pi_c]
+      description: Groth16 zero-knowledge proof
+      properties:
+        pi_a:
+          type: array
+          items:
+            type: string
+        pi_b:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+        pi_c:
+          type: array
+          items:
+            type: string
+        protocol:
+          type: string
+          enum: [groth16]
+        curve:
+          type: string
+          enum: [bn128, bls12381]
+
+    ZKPVerificationRequest:
+      type: object
+      required: [commitment, proof, publicSignals]
+      properties:
+        commitment:
+          type: string
+          pattern: '^[0-9a-f]{64,256}$'
+        proof:
+          $ref: '#/components/schemas/Groth16Proof'
+        publicSignals:
+          type: array
+          items:
+            type: string
+          description: First element must equal the commitment
+
+    HashVerificationRequest:
+      type: object
+      required: [commitment, preimage_hash]
+      properties:
+        commitment:
+          type: string
+          pattern: '^[0-9a-f]{64,256}$'
+        preimage_hash:
+          type: string
+          description: SHA-256 of "agentId:apiKey:salt"
+
+    AnonymousVerificationResponse:
+      type: object
+      required: [valid, reason]
+      properties:
+        valid:
+          type: boolean
+        reason:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+          description: Agent permissions (only if valid)
+        tier:
+          type: string
+          description: Agent tier (only if valid)
+
+    # ─── Drift Schemas ───────────────────────────────────────────────────────
+    HealthPingRequest:
+      type: object
+      required: [metrics]
+      properties:
+        metrics:
+          type: object
+          additionalProperties:
+            type: number
+          description: Key-value behavioral metrics (all values must be finite numbers)
+        request_count:
+          type: integer
+          minimum: 1
+        period_start:
+          type: string
+          format: date-time
+        period_end:
+          type: string
+          format: date-time
+
+    HealthPingResponse:
+      type: object
+      properties:
+        ping_id:
+          type: integer
+        agent_id:
+          type: string
+        drift_score:
+          type: number
+          minimum: 0
+          maximum: 1
+        spikes:
+          type: array
+          items:
+            type: string
+          description: Metric names that spiked anomalously
+        status:
+          type: string
+          enum: [healthy, warning, revoked]
+        message:
+          type: string
+
+    DriftScoreResponse:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        drift_score:
+          type: number
+          nullable: true
+          minimum: 0
+          maximum: 1
+        trend:
+          type: string
+          enum: [improving, stable, worsening]
+          nullable: true
+        last_ping_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum: [healthy, warning, critical]
+
+    DriftHistoryResponse:
+      type: object
+      properties:
+        history:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              drift_score:
+                type: number
+              metrics:
+                type: object
+              spikes:
+                type: array
+                items:
+                  type: string
+              created_at:
+                type: string
+                format: date-time
+        total:
+          type: integer
+
+    DriftConfigRequest:
+      type: object
+      properties:
+        drift_threshold:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Score above which agent is considered drifted
+        warning_threshold:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Score above which a warning webhook fires (must be < drift_threshold)
+        auto_revoke:
+          type: boolean
+          description: Auto-revoke agent when drift exceeds threshold
+        spike_sensitivity:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Standard deviations for spike detection (default 2.0)
+        metric_weights:
+          type: object
+          additionalProperties:
+            type: number
+            minimum: 0
+          description: Per-metric weights for drift score calculation
+        baseline_metrics:
+          type: object
+          additionalProperties:
+            type: number
+          description: Expected baseline metric values
+
+    DriftConfigResponse:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        drift_threshold:
+          type: number
+        warning_threshold:
+          type: number
+        auto_revoke:
+          type: boolean
+        spike_sensitivity:
+          type: number
+        metric_weights:
+          type: object
+        baseline_metrics:
+          type: object
+        updated_at:
+          type: string
+          format: date-time
+
+    # ─── Webhook Schemas ─────────────────────────────────────────────────────
     WebhookCreateRequest:
       type: object
-      required:
-        - agent_id
-        - url
-        - events
+      required: [agent_id, url, events]
       properties:
         agent_id:
           type: string
@@ -1129,7 +2121,7 @@ components:
           items:
             type: string
           minItems: 1
-          description: Array of event types to subscribe to
+          description: Event types to subscribe to
 
     WebhookUpdateRequest:
       type: object
@@ -1145,13 +2137,7 @@ components:
 
     Webhook:
       type: object
-      required:
-        - id
-        - agent_id
-        - url
-        - events
-        - is_active
-        - created_at
+      required: [id, agent_id, url, events, is_active, created_at]
       properties:
         id:
           type: string
@@ -1166,7 +2152,7 @@ components:
             type: string
         secret:
           type: string
-          description: Webhook secret for signature verification (only shown on creation/regeneration)
+          description: Webhook secret (only shown on creation/regeneration)
         is_active:
           type: boolean
         created_at:
@@ -1178,12 +2164,7 @@ components:
 
     WebhookDelivery:
       type: object
-      required:
-        - id
-        - webhook_id
-        - event
-        - status
-        - timestamp
+      required: [id, webhook_id, event, status, timestamp]
       properties:
         id:
           type: string
@@ -1204,11 +2185,10 @@ components:
           type: string
           format: date-time
 
+    # ─── Error Schema ────────────────────────────────────────────────────────
     Error:
       type: object
-      required:
-        - error
-        - message
+      required: [error, message]
       properties:
         error:
           type: string
@@ -1261,7 +2241,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             error: Not Found
-            message: Agent not found
+            message: Resource not found
 
     RateLimitExceeded:
       description: Rate limit exceeded

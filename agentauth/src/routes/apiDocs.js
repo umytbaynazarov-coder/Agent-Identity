@@ -8,10 +8,13 @@ const path = require('path');
 const openApiPath = path.join(__dirname, '../../docs/openapi.yaml');
 const swaggerDocument = YAML.load(openApiPath);
 
+// Available API versions
+const availableVersions = ['v0.7.0'];
+
 // Swagger UI options
 const swaggerUiOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'AgentAuth API Documentation',
+  customSiteTitle: 'AgentAuth API v0.7.0 Documentation',
   customfavIcon: '/favicon.ico',
   swaggerOptions: {
     persistAuthorization: true,
@@ -25,6 +28,10 @@ const swaggerUiOptions = {
         description: 'Production',
       },
       {
+        url: 'https://staging-api.agentauth.dev',
+        description: 'Staging',
+      },
+      {
         url: 'http://localhost:3000',
         description: 'Local Development',
       },
@@ -32,9 +39,10 @@ const swaggerUiOptions = {
   },
 };
 
-// Serve Swagger UI
-router.use('/', swaggerUi.serve);
-router.get('/', swaggerUi.setup(swaggerDocument, swaggerUiOptions));
+// List available API versions
+router.get('/versions', (req, res) => {
+  res.json(availableVersions);
+});
 
 // Serve raw OpenAPI spec as JSON
 router.get('/openapi.json', (req, res) => {
@@ -46,5 +54,13 @@ router.get('/openapi.yaml', (req, res) => {
   res.type('text/yaml');
   res.send(YAML.stringify(swaggerDocument, 10));
 });
+
+// Serve Swagger UI at versioned path /v0.7.0
+router.use('/v0.7.0', swaggerUi.serveFiles(swaggerDocument, swaggerUiOptions));
+router.get('/v0.7.0', swaggerUi.setup(swaggerDocument, swaggerUiOptions));
+
+// Serve Swagger UI at root
+router.use('/', swaggerUi.serve);
+router.get('/', swaggerUi.setup(swaggerDocument, swaggerUiOptions));
 
 module.exports = router;

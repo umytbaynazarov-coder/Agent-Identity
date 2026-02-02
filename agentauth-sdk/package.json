@@ -1,6 +1,6 @@
 {
   "name": "@umytbaynazarow/agentauth-sdk",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Lightweight, type-safe SDK for AgentAuth - Authentication for AI Agents",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

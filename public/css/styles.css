@@ -1136,3 +1136,228 @@ section {
         gap: 12px;
     }
 }
+
+/* ============================================
+   v0.7.0 Feature Cards (NEW badges)
+   ============================================ */
+
+.feature-card-new {
+    position: relative;
+    border: 1px solid rgba(0, 229, 160, 0.25);
+    background: linear-gradient(135deg, rgba(0, 229, 160, 0.05), rgba(0, 102, 255, 0.05));
+}
+
+.feature-card-new:hover {
+    border-color: rgba(0, 229, 160, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 229, 160, 0.15);
+}
+
+.feature-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: var(--white);
+    margin-bottom: 8px;
+}
+
+.feature-icon-soul {
+    background: linear-gradient(135deg, rgba(0, 229, 160, 0.15), rgba(0, 102, 255, 0.15));
+}
+
+.feature-icon-soul svg {
+    stroke: var(--secondary);
+}
+
+/* ============================================
+   Sandbox Section
+   ============================================ */
+
+.sandbox {
+    padding: 100px 0;
+    background: var(--dark);
+}
+
+.sandbox-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    justify-content: center;
+}
+
+.sandbox-tab-btn {
+    padding: 10px 24px;
+    border: 1px solid rgba(139, 146, 176, 0.2);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--gray);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sandbox-tab-btn:hover {
+    border-color: var(--primary-light);
+    color: var(--white);
+}
+
+.sandbox-tab-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-color: transparent;
+    color: var(--white);
+    font-weight: 600;
+}
+
+.sandbox-panels {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.sandbox-panel {
+    display: none;
+}
+
+.sandbox-panel.active {
+    display: block;
+}
+
+/* ============================================
+   API Endpoints Reference
+   ============================================ */
+
+.api-endpoints-ref {
+    margin-top: 48px;
+    padding: 32px;
+    border-radius: 16px;
+    background: var(--dark-card);
+    border: 1px solid rgba(139, 146, 176, 0.1);
+}
+
+.api-endpoints-ref h3 {
+    font-size: 20px;
+    margin-bottom: 24px;
+    text-align: center;
+    color: var(--white);
+}
+
+.endpoints-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.endpoint-group h4 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--secondary);
+    margin-bottom: 12px;
+}
+
+.endpoint-group code {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--gray);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(139, 146, 176, 0.08);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.endpoint-group code:last-child {
+    border-bottom: none;
+}
+
+/* ============================================
+   Blog Teaser
+   ============================================ */
+
+.updates-blog-teaser {
+    margin-top: 32px;
+    text-align: center;
+}
+
+.blog-teaser-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    border-radius: 12px;
+    background: var(--dark-card);
+    border: 1px solid rgba(139, 146, 176, 0.15);
+    color: var(--white);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.blog-teaser-link:hover {
+    border-color: var(--primary-light);
+    background: var(--dark-surface);
+    transform: translateY(-2px);
+}
+
+.blog-teaser-tag {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--primary);
+    color: var(--white);
+}
+
+.blog-teaser-text {
+    color: var(--gray-light);
+}
+
+.blog-teaser-link svg {
+    stroke: var(--secondary);
+    transition: transform 0.3s ease;
+}
+
+.blog-teaser-link:hover svg {
+    transform: translateX(4px);
+}
+
+/* ============================================
+   Responsive: Sandbox & Endpoints
+   ============================================ */
+
+@media (max-width: 768px) {
+    .sandbox {
+        padding: 80px 0;
+    }
+
+    .sandbox-tabs {
+        flex-wrap: wrap;
+    }
+
+    .sandbox-tab-btn {
+        flex: 1;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    .endpoints-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .api-endpoints-ref {
+        padding: 20px;
+    }
+
+    .blog-teaser-link {
+        flex-direction: column;
+        text-align: center;
+    }
+}
