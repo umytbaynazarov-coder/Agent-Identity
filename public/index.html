@@ -122,7 +122,7 @@
 <span class="code-command">npm install agentauth</span>
 
 <span class="code-comment"># Register an agent</span>
-<span class="code-command">curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/agents/register \</span>
+<span class="code-command">curl -X POST https://agent-identity-production-dc4e.up.railway.app/v1/agents/register \</span>
   <span class="code-flag">-H</span> <span class="code-string">"Content-Type: application/json"</span> \
   <span class="code-flag">-d</span> <span class="code-string">'{"name":"MyAgent","owner_email":"you@example.com"}'</span>
 
@@ -313,7 +313,7 @@
 // Initialize client
 const AgentAuth = require('agentauth');
 const auth = new AgentAuth({
-  apiUrl: 'https://agentauth-production-b6b2.up.railway.app',
+  apiUrl: 'https://agent-identity-production-dc4e.up.railway.app',
   apiKey: process.env.AGENTAUTH_KEY
 });</code></pre>
                     </div>
@@ -435,7 +435,7 @@ response = requests.get('/api/data',
                                 </svg>
                             </button>
                         </div>
-                        <pre id="curl-register"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/agents/register \
+                        <pre id="curl-register"><code>curl -X POST https://agent-identity-production-dc4e.up.railway.app/v1/agents/register \
   -H "Content-Type: application/json" \
   -d '{
     "name": "MyAgent",
@@ -560,7 +560,7 @@ response = requests.get('/api/data',
                                 </svg>
                             </button>
                         </div>
-                        <pre id="sandbox-persona-register"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/agents/YOUR_AGENT_ID/persona \
+                        <pre id="sandbox-persona-register"><code>curl -X POST https://agent-identity-production-dc4e.up.railway.app/v1/agents/YOUR_AGENT_ID/persona \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: YOUR_API_KEY" \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -590,7 +590,7 @@ response = requests.get('/api/data',
                                 </svg>
                             </button>
                         </div>
-                        <pre id="sandbox-persona-verify"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/agents/YOUR_AGENT_ID/persona/verify \
+                        <pre id="sandbox-persona-verify"><code>curl -X POST https://agent-identity-production-dc4e.up.railway.app/v1/agents/YOUR_AGENT_ID/persona/verify \
   -H "X-Api-Key: YOUR_API_KEY" \
   -H "Authorization: Bearer YOUR_TOKEN"
 
@@ -610,7 +610,7 @@ response = requests.get('/api/data',
                                 </svg>
                             </button>
                         </div>
-                        <pre id="sandbox-zkp-commit"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/zkp/register-commitment \
+                        <pre id="sandbox-zkp-commit"><code>curl -X POST https://agent-identity-production-dc4e.up.railway.app/v1/zkp/register-commitment \
   -H "Content-Type: application/json" \
   -d '{
     "agent_id": "YOUR_AGENT_ID",
@@ -632,7 +632,7 @@ response = requests.get('/api/data',
                                 </svg>
                             </button>
                         </div>
-                        <pre id="sandbox-zkp-verify"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/zkp/verify-anonymous \
+                        <pre id="sandbox-zkp-verify"><code>curl -X POST https://agent-identity-production-dc4e.up.railway.app/v1/zkp/verify-anonymous \
   -H "Content-Type: application/json" \
   -d '{
     "commitment": "YOUR_COMMITMENT_HASH",
@@ -656,7 +656,7 @@ response = requests.get('/api/data',
                                 </svg>
                             </button>
                         </div>
-                        <pre id="sandbox-drift-ping"><code>curl -X POST https://agentauth-production-b6b2.up.railway.app/v1/drift/YOUR_AGENT_ID/health-ping \
+                        <pre id="sandbox-drift-ping"><code>curl -X POST https://agent-identity-production-dc4e.up.railway.app/v1/drift/YOUR_AGENT_ID/health-ping \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: YOUR_API_KEY" \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -682,7 +682,7 @@ response = requests.get('/api/data',
                                 </svg>
                             </button>
                         </div>
-                        <pre id="sandbox-drift-score"><code>curl https://agentauth-production-b6b2.up.railway.app/v1/drift/YOUR_AGENT_ID/drift-score
+                        <pre id="sandbox-drift-score"><code>curl https://agent-identity-production-dc4e.up.railway.app/v1/drift/YOUR_AGENT_ID/drift-score
 
 # Response includes score, thresholds, trend, and spike warnings</code></pre>
                     </div>
@@ -722,7 +722,7 @@ response = requests.get('/api/data',
                         <pre><code>import { AgentAuthClient, Permissions } from '@umytbaynazarow/agentauth-sdk';
 
 const client = new AgentAuthClient({
-  baseURL: 'https://agentauth-production-b6b2.up.railway.app'
+  baseURL: 'https://agent-identity-production-dc4e.up.railway.app'
 });
 
 const { agent, credentials } = await client.registerAgent({
@@ -756,7 +756,7 @@ const { agent, credentials } = await client.registerAgent({
                     <div class="code-preview">
                         <pre><code>from agentauth_sdk import AgentAuthClient, Permissions
 
-async with AgentAuthClient(base_url='https://agentauth-production-b6b2.up.railway.app') as client:
+async with AgentAuthClient(base_url='https://agent-identity-production-dc4e.up.railway.app') as client:
     result = await client.register_agent(
         name='Demo Agent',
         permissions=[
@@ -782,7 +782,7 @@ async with AgentAuthClient(base_url='https://agentauth-production-b6b2.up.railwa
                     <span class="doc-icon">📙</span>
                     <span>CLI Guide</span>
                 </a>
-                <a href="https://agentauth-production-b6b2.up.railway.app/api-docs" target="_blank" class="doc-link primary">
+                <a href="https://agent-identity-production-dc4e.up.railway.app/api-docs" target="_blank" class="doc-link primary">
                     <span class="doc-icon">📚</span>
                     <span>Full API Docs</span>
                 </a>
@@ -926,7 +926,7 @@ async with AgentAuthClient(base_url='https://agentauth-production-b6b2.up.railwa
                         <h4>Product</h4>
                         <a href="#features">Features</a>
                         <a href="#quickstart">Quick Start</a>
-                        <a href="https://agentauth-production-b6b2.up.railway.app/api-docs" target="_blank">API Docs</a>
+                        <a href="https://agent-identity-production-dc4e.up.railway.app/api-docs" target="_blank">API Docs</a>
                         <a href="https://agentauths.betteruptime.com/" target="_blank">Status Page</a>
                     </div>
 

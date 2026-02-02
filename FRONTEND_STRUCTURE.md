@@ -61,7 +61,7 @@ netlify.toml
   - Step 3: fetch agent details with JWT
   - UI state updates, copy buttons, and success banner.
 - **API base URL** used for demo calls:
-  - `https://agentauth-production-b6b2.up.railway.app`
+  - `https://agent-identity-production-dc4e.up.railway.app`
 - **Analytics hooks** (optional): `gtag` calls if present.
 
 ### `netlify.toml`

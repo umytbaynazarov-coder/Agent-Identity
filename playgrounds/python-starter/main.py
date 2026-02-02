@@ -14,7 +14,7 @@ async def main():
     print('🚀 AgentAuth Python Demo\n')
 
     # Initialize the client (context manager handles cleanup)
-    base_url = os.getenv('AGENTAUTH_BASE_URL', 'https://agentauth-production-b6b2.up.railway.app')
+    base_url = os.getenv('AGENTAUTH_BASE_URL', 'https://agent-identity-production-dc4e.up.railway.app')
 
     async with AgentAuthClient(base_url=base_url) as client:
         try:

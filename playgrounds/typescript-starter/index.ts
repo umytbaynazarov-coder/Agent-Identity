@@ -12,7 +12,7 @@ async function main() {
 
   // Initialize the client
   const client = new AgentAuthClient({
-    baseURL: process.env.AGENTAUTH_BASE_URL || 'https://agentauth-production-b6b2.up.railway.app',
+    baseURL: process.env.AGENTAUTH_BASE_URL || 'https://agent-identity-production-dc4e.up.railway.app',
   });
 
   try {
@@ -65,7 +65,7 @@ async function main() {
   } catch (error) {
     console.error('\n❌ Error:', error instanceof Error ? error.message : error);
     console.log('\n💡 Tip: Make sure the AgentAuth API is running at:',
-                process.env.AGENTAUTH_BASE_URL || 'https://agentauth-production-b6b2.up.railway.app');
+                process.env.AGENTAUTH_BASE_URL || 'https://agent-identity-production-dc4e.up.railway.app');
   }
 }
 

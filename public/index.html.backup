@@ -519,7 +519,7 @@ const { agent, credentials } = await client.registerAgent({
                     <div class="code-preview">
                         <pre><code>from agentauth_sdk import AgentAuthClient, Permissions
 
-async with AgentAuthClient(base_url='https://agentauth-production-b6b2.up.railway.app') as client:
+async with AgentAuthClient(base_url='https://agent-identity-production-dc4e.up.railway.app') as client:
     result = await client.register_agent(
         name='Demo Agent',
         permissions=[

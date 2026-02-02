@@ -43,7 +43,7 @@ import type {
   PermissionMappingConfig,
 } from '../types.js';
 
-const DEFAULT_BASE_URL = 'https://agentauth-production-b6b2.up.railway.app';
+const DEFAULT_BASE_URL = 'https://agent-identity-production-dc4e.up.railway.app';
 const REGISTER_DELAY_MS = 10_000; // 10s between registrations (10 req / 15 min limit)
 
 /**

@@ -39,7 +39,7 @@ This guide walks you through setting up a public status page for AgentAuth to mo
 
 ```
 Name: AgentAuth API - Production
-URL: https://agentauth-production-b6b2.up.railway.app/health
+URL: https://agent-identity-production-dc4e.up.railway.app/health
 Method: GET
 Expected Status: 200
 Check Interval: 5 minutes
@@ -68,7 +68,7 @@ Timeout: 30 seconds
 
 ```
 Name: Database Health Check
-URL: https://agentauth-production-b6b2.up.railway.app/health/detailed
+URL: https://agent-identity-production-dc4e.up.railway.app/health/detailed
 Method: GET
 Expected Status: 200
 Check Interval: 10 minutes
@@ -178,7 +178,7 @@ Replace `xxxxx` with your monitor ID (found in monitor settings).
 ```
 Monitor Type: HTTP(s)
 Friendly Name: AgentAuth API - Production
-URL: https://agentauth-production-b6b2.up.railway.app/health
+URL: https://agent-identity-production-dc4e.up.railway.app/health
 Monitoring Interval: 5 minutes
 Monitor Timeout: 30 seconds
 Alert Contacts: Your email
@@ -203,7 +203,7 @@ Monitoring Interval: 5 minutes
 ```
 Monitor Type: HTTP(s)
 Friendly Name: Database Connectivity
-URL: https://agentauth-production-b6b2.up.railway.app/health/detailed
+URL: https://agent-identity-production-dc4e.up.railway.app/health/detailed
 Monitoring Interval: 10 minutes
 Keyword: "database":{"status":"healthy"
 ```

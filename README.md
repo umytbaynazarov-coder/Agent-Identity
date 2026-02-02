@@ -8,8 +8,8 @@
 [![Uptime](https://img.shields.io/badge/uptime-99.9%25%20target-success.svg)](https://agentauths.betteruptime.com/)
 [![Status](https://img.shields.io/badge/status-operational-success.svg)](https://agentauths.betteruptime.com/)
 
-**Live API:** https://agentauth-production-b6b2.up.railway.app
-**API Docs:** https://agentauth-production-b6b2.up.railway.app/api-docs
+**Live API:** https://agent-identity-production-dc4e.up.railway.app
+**API Docs:** https://agent-identity-production-dc4e.up.railway.app/api-docs
 **Status Page:** https://agentauths.betteruptime.com/
 **Documentation:** [SLA](docs/sla.md) | [Incident Log](docs/incidents.md) | [Setup Guide](docs/status-page-setup.md)
 

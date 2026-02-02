@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE = 'https://agentauth-production-b6b2.up.railway.app';
+const API_BASE = 'https://agent-identity-production-dc4e.up.railway.app';
 
 // Demo state
 let demoState = {
