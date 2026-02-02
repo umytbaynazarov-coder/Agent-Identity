@@ -1,10 +1,22 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 const agentService = require('../services/agentService');
 const agentValidator = require('../validators/agentValidator');
 const { authLimiter } = require('../middleware/rateLimiter');
 const { APIError, asyncHandler } = require('../middleware/errorHandler');
 const logger = require('../config/logger');
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const ACCESS_TOKEN_EXPIRY = '1h';
+const REFRESH_TOKEN_EXPIRY = '7d';
+
+function generateTokens(agent) {
+  const payload = { agent_id: agent.agent_id, tier: agent.tier || 'free' };
+  const access_token = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+  const refresh_token = jwt.sign({ ...payload, type: 'refresh' }, JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+  return { access_token, refresh_token, expires_in: 3600, token_type: 'Bearer' };
+}
 
 /**
  * POST /agents/register
@@ -98,20 +110,56 @@ router.post('/verify', authLimiter, asyncHandler(async (req, res) => {
     tier: agent.tier,
   });
 
+  const token = generateTokens(agent);
+
   const verifyResponse = {
-    valid: true,
-    agent_id: agent.agent_id,
-    name: agent.name,
-    tier: agent.tier || 'free',
-    permissions: agent.permissions,
-    status: agent.status,
+    verified: true,
+    agent: {
+      agent_id: agent.agent_id,
+      name: agent.name,
+      tier: agent.tier || 'free',
+      permissions: agent.permissions,
+      status: agent.status,
+    },
+    token,
   };
 
   if (agent.persona_valid !== undefined) {
-    verifyResponse.persona_valid = agent.persona_valid;
+    verifyResponse.agent.persona_valid = agent.persona_valid;
   }
 
   res.json(verifyResponse);
+}));
+
+/**
+ * POST /agents/refresh
+ * Refresh an expired access token using a refresh token
+ */
+router.post('/refresh', authLimiter, asyncHandler(async (req, res) => {
+  const { refresh_token } = req.body;
+  if (!refresh_token) {
+    throw new APIError('Missing refresh_token', 400);
+  }
+
+  let payload;
+  try {
+    payload = jwt.verify(refresh_token, JWT_SECRET);
+  } catch {
+    throw new APIError('Invalid or expired refresh token', 401);
+  }
+
+  if (payload.type !== 'refresh') {
+    throw new APIError('Invalid token type', 401);
+  }
+
+  // Look up the agent to get current data
+  const agent = await agentService.findAgentById(payload.agent_id);
+  if (!agent || agent.status !== 'active') {
+    throw new APIError('Agent not found or inactive', 401);
+  }
+
+  const token = generateTokens(agent);
+  res.json(token);
 }));
 
 /**
