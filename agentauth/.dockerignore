@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log
+.env
+.env.example
+__tests__
+docs
+*.md
+.DS_Store
+*.log
+.git
+.railwayignore
