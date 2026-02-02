@@ -14,7 +14,7 @@ import {
   SignalIcon,
 } from '@heroicons/react/24/outline';
 import type { Agent } from '../../types/agent';
-import type { DriftHistoryEntry, AnomalyNote } from '../../types/drift';
+import type { DriftConfig, DriftHistoryEntry, AnomalyNote } from '../../types/drift';
 
 function getDriftStatus(score: number | null, warning?: number, threshold?: number) {
   if (score === null) return { label: 'No Data', variant: 'neutral' as const };
@@ -102,19 +102,11 @@ export function DriftPage() {
   });
 
   // Fetch drift config
-  const { data: driftConfig } = useQuery({
+  const { data: driftConfig } = useQuery<DriftConfig>({
     queryKey: ['drift-config', selectedAgentId],
     queryFn: () => driftApi.getDriftConfig(selectedAgentId),
     enabled: !!selectedAgentId && showConfig,
-    onSuccess: (data) => {
-      setConfigForm({
-        drift_threshold: data.drift_threshold,
-        warning_threshold: data.warning_threshold,
-        auto_revoke: data.auto_revoke,
-        spike_sensitivity: data.spike_sensitivity,
-      });
-    },
-  } as any);
+  });
 
   // Update config mutation
   const updateConfigMutation = useMutation({
