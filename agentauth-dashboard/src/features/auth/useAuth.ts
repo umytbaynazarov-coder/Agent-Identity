@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/agents/verify`, {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/agents/verify`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

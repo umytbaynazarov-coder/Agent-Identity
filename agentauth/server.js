@@ -114,16 +114,14 @@ app.use('/v1/agents/:agent_id/persona', personaRoutes);
 app.use('/v1/zkp', zkpRoutes);
 app.use('/v1/webhooks', webhookRoutes);
 
-// Legacy routes (backwards compatibility - redirect to v1)
+// Legacy routes (backwards compatibility - mount same routers without /v1 prefix)
 app.use('/agents', (req, _res, next) => {
   logger.warn('Legacy route used', { path: req.path, method: req.method });
-  req.url = '/v1' + req.url;
   next();
 }, agentRoutes);
 
 app.use('/webhooks', (req, _res, next) => {
   logger.warn('Legacy route used', { path: req.path, method: req.method });
-  req.url = '/v1' + req.url;
   next();
 }, webhookRoutes);
 

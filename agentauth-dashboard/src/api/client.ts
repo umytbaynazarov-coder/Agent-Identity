@@ -30,7 +30,7 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
+    const url = `${this.baseURL}/v1${endpoint}`;
     const accessToken = this.getAccessToken?.();
 
     const headers: Record<string, string> = {
@@ -97,7 +97,7 @@ class ApiClient {
         return false;
       }
 
-      const response = await fetch(`${this.baseURL}/agents/refresh`, {
+      const response = await fetch(`${this.baseURL}/v1/agents/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
