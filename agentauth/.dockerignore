@@ -3,8 +3,8 @@ npm-debug.log
 .env
 .env.example
 __tests__
-docs
 *.md
+# Keep docs/ — apiDocs.js loads docs/openapi.yaml at startup
 .DS_Store
 *.log
 .git
