@@ -13,6 +13,9 @@ RUN npm install --only=production
 # Copy app source
 COPY . .
 
+# Create logs directory for Winston logger
+RUN mkdir -p logs
+
 # Expose port (Railway will override with PORT env var)
 EXPOSE 3000
 

@@ -89,8 +89,9 @@ router.get('/', async (req, res) => {
   // Add response time
   health.responseTime = Date.now() - startTime;
 
-  const statusCode = health.status === 'healthy' ? 200 : 503;
-  res.status(statusCode).json(health);
+  // Always return 200 for liveness — the server is running.
+  // Database issues are reported in the body but don't fail the health check.
+  res.status(200).json(health);
 });
 
 /**
