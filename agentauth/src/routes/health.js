@@ -14,84 +14,17 @@ const serverStartTime = Date.now();
 
 /**
  * GET /health
- * Basic health check endpoint for monitoring services
- * Returns: 200 (healthy), 503 (unhealthy/degraded)
+ * Liveness probe — instant response, no external dependencies.
+ * Use /health/detailed for database and memory checks.
  */
-router.get('/', async (req, res) => {
-  const startTime = Date.now();
-
-  const health = {
+router.get('/', (req, res) => {
+  res.status(200).json({
     status: 'healthy',
     service: 'AgentAuth API',
     version: '0.7.0',
     timestamp: new Date().toISOString(),
-    uptime: Math.floor((Date.now() - serverStartTime) / 1000), // seconds
-    checks: {
-      database: 'unknown',
-      memory: 'unknown',
-    },
-  };
-
-  try {
-    // Test database connectivity with timeout
-    const dbCheckStart = Date.now();
-    const { error } = await supabase
-      .from('agents')
-      .select('agent_id')
-      .limit(1);
-
-    const dbResponseTime = Date.now() - dbCheckStart;
-
-    if (error) {
-      health.checks.database = 'unhealthy';
-      health.status = 'degraded';
-      logger.error('Health check - database error', { error: error.message });
-    } else {
-      health.checks.database = 'healthy';
-      // Warn if database is slow (>1000ms is concerning)
-      if (dbResponseTime > 1000) {
-        health.checks.database = 'degraded';
-        health.status = 'degraded';
-        logger.warn('Health check - slow database response', { responseTime: dbResponseTime });
-      }
-    }
-  } catch (err) {
-    health.checks.database = 'unhealthy';
-    health.status = 'unhealthy';
-    logger.error('Health check - database exception', { error: err.message });
-  }
-
-  // Check memory usage
-  try {
-    const memUsage = process.memoryUsage();
-    const totalMem = os.totalmem();
-    const freeMem = os.freemem();
-    const usedMemPercent = ((totalMem - freeMem) / totalMem) * 100;
-
-    // Warn if using >512MB heap or >80% system memory
-    if (memUsage.heapUsed > 512 * 1024 * 1024 || usedMemPercent > 80) {
-      health.checks.memory = 'degraded';
-      if (health.status === 'healthy') {
-        health.status = 'degraded';
-      }
-      logger.warn('Health check - high memory usage', {
-        heapUsedMB: Math.round(memUsage.heapUsed / 1024 / 1024),
-        systemUsedPercent: Math.round(usedMemPercent),
-      });
-    } else {
-      health.checks.memory = 'healthy';
-    }
-  } catch (err) {
-    health.checks.memory = 'unknown';
-    logger.error('Health check - memory check failed', { error: err.message });
-  }
-
-  // Add response time
-  health.responseTime = Date.now() - startTime;
-
-  // Always return 200 for liveness — the server is running.
-  // Database issues are reported in the body but don't fail the health check.
-  res.status(200).json(health);
+    uptime: Math.floor((Date.now() - serverStartTime) / 1000),
+  });
 });
 
 /**

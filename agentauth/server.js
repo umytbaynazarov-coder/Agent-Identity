@@ -83,6 +83,10 @@ const corsOptions = {
 // MIDDLEWARE
 // ============================================
 
+// Trust first proxy (Railway, Render, etc.) — required for express-rate-limit
+// to read the real client IP from X-Forwarded-For
+app.set('trust proxy', 1);
+
 // CORS
 app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
