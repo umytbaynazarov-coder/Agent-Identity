@@ -8,14 +8,24 @@ const requestLogger = require('./src/middleware/requestLogger');
 const { generalLimiter } = require('./src/middleware/rateLimiter');
 const { errorHandler, notFoundHandler } = require('./src/middleware/errorHandler');
 
-// Import routes
-const healthRoutes = require('./src/routes/health');
-const agentRoutes = require('./src/routes/agents');
-const personaRoutes = require('./src/routes/persona');
-const zkpRoutes = require('./src/routes/zkp');
-const driftRoutes = require('./src/routes/drift');
-const webhookRoutes = require('./src/routes/webhooks');
-const apiDocsRoutes = require('./src/routes/apiDocs');
+// Import routes (wrapped to prevent startup crash — logs the actual error)
+function safeRequire(modulePath) {
+  try {
+    return require(modulePath);
+  } catch (err) {
+    console.error(`FATAL: Failed to load ${modulePath}:`, err.message);
+    console.error(err.stack);
+    return null;
+  }
+}
+
+const healthRoutes = safeRequire('./src/routes/health');
+const agentRoutes = safeRequire('./src/routes/agents');
+const personaRoutes = safeRequire('./src/routes/persona');
+const zkpRoutes = safeRequire('./src/routes/zkp');
+const driftRoutes = safeRequire('./src/routes/drift');
+const webhookRoutes = safeRequire('./src/routes/webhooks');
+const apiDocsRoutes = safeRequire('./src/routes/apiDocs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -105,29 +115,39 @@ app.use(generalLimiter);
 // ROUTES - API v1
 // ============================================
 
-// Health check (no versioning for monitoring)
-app.use('/health', healthRoutes);
+// Inline health check — always available, no dependencies
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    service: 'AgentAuth API',
+    version: '0.7.0',
+    timestamp: new Date().toISOString(),
+  });
+});
 
-// API Documentation (Swagger UI)
-app.use('/api-docs', apiDocsRoutes);
+// Mount routes only if they loaded successfully
+if (healthRoutes) app.use('/health', healthRoutes);
+if (apiDocsRoutes) app.use('/api-docs', apiDocsRoutes);
+if (driftRoutes) app.use('/v1/drift', driftRoutes);
+if (agentRoutes) app.use('/v1/agents', agentRoutes);
+if (personaRoutes) app.use('/v1/agents/:agent_id/persona', personaRoutes);
+if (zkpRoutes) app.use('/v1/zkp', zkpRoutes);
+if (webhookRoutes) app.use('/v1/webhooks', webhookRoutes);
 
-// API v1 routes — drift routes mounted BEFORE generic agents router
-app.use('/v1/drift', driftRoutes);
-app.use('/v1/agents', agentRoutes);
-app.use('/v1/agents/:agent_id/persona', personaRoutes);
-app.use('/v1/zkp', zkpRoutes);
-app.use('/v1/webhooks', webhookRoutes);
+// Legacy routes (backwards compatibility)
+if (agentRoutes) {
+  app.use('/agents', (req, _res, next) => {
+    logger.warn('Legacy route used', { path: req.path, method: req.method });
+    next();
+  }, agentRoutes);
+}
 
-// Legacy routes (backwards compatibility - mount same routers without /v1 prefix)
-app.use('/agents', (req, _res, next) => {
-  logger.warn('Legacy route used', { path: req.path, method: req.method });
-  next();
-}, agentRoutes);
-
-app.use('/webhooks', (req, _res, next) => {
-  logger.warn('Legacy route used', { path: req.path, method: req.method });
-  next();
-}, webhookRoutes);
+if (webhookRoutes) {
+  app.use('/webhooks', (req, _res, next) => {
+    logger.warn('Legacy route used', { path: req.path, method: req.method });
+    next();
+  }, webhookRoutes);
+}
 
 // ============================================
 // ERROR HANDLING
