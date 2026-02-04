@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { APIError, asyncHandler } = require('./errorHandler');
 const logger = require('../config/logger');
+const agentService = require('../services/agentService');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -138,8 +139,6 @@ const optionalAuthenticateJWT = asyncHandler(async (req, res, next) => {
  * Accepts EITHER JWT (Bearer token) OR API Key (X-Api-Key header)
  * Used for endpoints that support both dashboard (JWT) and SDK (API key) access
  */
-const agentService = require('../services/agentService');
-
 const authenticateFlexible = asyncHandler(async (req, res, next) => {
   const authHeader = req.headers.authorization;
   const apiKey = req.headers['x-api-key'];

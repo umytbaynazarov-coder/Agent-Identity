@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: umytbaynazarow-agentauth-sdk
-Version: 0.1.2
+Version: 0.7.0
 Summary: Lightweight, type-safe Python SDK for AgentAuth - Authentication for AI Agents
 Author-email: umytbaynazarov-coder <umytappleb7@icloud.com>
 License-Expression: MIT

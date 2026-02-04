@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login</title>
+</head>
+<body>
+    <h1>AgentAuth Login Test</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <pre id="output"></pre>
+
+    <script>
+        async function testLogin() {
+            const output = document.getElementById('output');
+            output.textContent = 'Testing...\n';
+
+            try {
+                const response = await fetch('https://agent-identity-production-dc4e.up.railway.app/v1/agents/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        agent_id: 'agt_739ea11ff534df2d0c9b834821fc337b',
+                        api_key: 'sk_610981059f1e839cc2ce70a9c744f0855ae68deca4f330d6384a70f47be79fc4'
+                    })
+                });
+
+                output.textContent += `Status: ${response.status}\n\n`;
+
+                const data = await response.json();
+                output.textContent += 'Response:\n' + JSON.stringify(data, null, 2) + '\n\n';
+
+                // Test the exact check from useAuth.ts line 61
+                if (data.agent && data.agent.permissions) {
+                    output.textContent += `Permissions: ${JSON.stringify(data.agent.permissions)}\n`;
+                    output.textContent += `Type: ${typeof data.agent.permissions}\n`;
+                    output.textContent += `Is Array: ${Array.isArray(data.agent.permissions)}\n`;
+                    output.textContent += `Includes *:*:*: ${data.agent.permissions.includes('*:*:*')}\n`;
+                    output.textContent += `Optional chaining check: ${data.agent.permissions?.includes('*:*:*')}\n`;
+                } else {
+                    output.textContent += 'ERROR: agent.permissions is missing or undefined\n';
+                    output.textContent += `data.agent: ${JSON.stringify(data.agent)}\n`;
+                }
+
+            } catch (error) {
+                output.textContent += `Error: ${error.message}\n`;
+                output.textContent += `Stack: ${error.stack}\n`;
+            }
+        }
+    </script>
+</body>
+</html>
