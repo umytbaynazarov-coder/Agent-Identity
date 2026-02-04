@@ -78,8 +78,7 @@ export const agentsApi = {
    * Get agent details by ID
    */
   async get(agentId: string): Promise<Agent> {
-    const response = await apiClient.get<GetAgentResponse>(`/agents/${agentId}`);
-    return response.agent;
+    return apiClient.get<Agent>(`/agents/${agentId}`);
   },
 
   /**
@@ -118,10 +117,9 @@ export const agentsApi = {
    * Update agent tier
    */
   async updateTier(agentId: string, tier: 'free' | 'pro' | 'enterprise'): Promise<Agent> {
-    const response = await apiClient.put<{ agent: Agent }>(`/agents/${agentId}/tier`, {
+    return apiClient.put<Agent>(`/agents/${agentId}/tier`, {
       tier,
     });
-    return response.agent;
   },
 
   /**

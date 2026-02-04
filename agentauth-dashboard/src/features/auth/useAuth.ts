@@ -58,7 +58,7 @@ export const useAuthStore = create<AuthState>()(
           const data: VerifyResponse = await response.json();
 
           // Check if agent has admin permission
-          if (!data.agent.permissions.includes('*:*:*')) {
+          if (!data.agent.permissions?.includes('*:*:*')) {
             throw new Error('Admin permission (*:*:*) required to access dashboard');
           }
 

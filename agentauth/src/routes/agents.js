@@ -118,7 +118,7 @@ router.post('/verify', authLimiter, asyncHandler(async (req, res) => {
       agent_id: agent.agent_id,
       name: agent.name,
       tier: agent.tier || 'free',
-      permissions: agent.permissions,
+      permissions: agent.permissions || [],
       status: agent.status,
     },
     token,
