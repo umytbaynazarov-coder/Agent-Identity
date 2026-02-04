@@ -45,7 +45,7 @@ router.post('/register', authLimiter, asyncHandler(async (req, res) => {
     owner_email: agent.owner_email,
     api_key: agent.api_key, // Only shown once
     tier: agent.tier || 'free',
-    permissions: agent.permissions,
+    permissions: agent.permissions || [],
     created_at: agent.created_at,
   };
 

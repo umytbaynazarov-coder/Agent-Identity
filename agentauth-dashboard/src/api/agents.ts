@@ -47,10 +47,15 @@ export interface RegisterAgentRequest {
 }
 
 export interface RegisterAgentResponse {
-  success: boolean;
-  message: string;
-  agent: Agent;
+  agent_id: string;
+  name: string;
+  owner_email: string;
   api_key: string;
+  tier: string;
+  permissions: string[];
+  created_at: string;
+  persona_version?: string;
+  persona_hash?: string;
 }
 
 export const agentsApi = {
