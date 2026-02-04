@@ -4,6 +4,7 @@ const router = express.Router();
 const agentService = require('../services/agentService');
 const agentValidator = require('../validators/agentValidator');
 const { authLimiter } = require('../middleware/rateLimiter');
+const { authenticateJWT } = require('../middleware/auth');
 const { APIError, asyncHandler } = require('../middleware/errorHandler');
 const logger = require('../config/logger');
 
@@ -166,7 +167,7 @@ router.post('/refresh', authLimiter, asyncHandler(async (req, res) => {
  * GET /agents
  * List all agents (admin only)
  */
-router.get('/', asyncHandler(async (req, res) => {
+router.get('/', authenticateJWT, asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 50;
   const offset = parseInt(req.query.offset) || 0;
   const status = req.query.status;
@@ -180,7 +181,7 @@ router.get('/', asyncHandler(async (req, res) => {
  * GET /agents/:agent_id
  * Get agent details
  */
-router.get('/:agent_id', asyncHandler(async (req, res) => {
+router.get('/:agent_id', authenticateJWT, asyncHandler(async (req, res) => {
   const { agent_id } = req.params;
 
   const agent = await agentService.findAgentById(agent_id);
@@ -199,7 +200,7 @@ router.get('/:agent_id', asyncHandler(async (req, res) => {
  * PUT /agents/:agent_id/tier
  * Update agent tier
  */
-router.put('/:agent_id/tier', asyncHandler(async (req, res) => {
+router.put('/:agent_id/tier', authenticateJWT, asyncHandler(async (req, res) => {
   const { agent_id } = req.params;
   const { tier } = req.body;
 
@@ -227,7 +228,7 @@ router.put('/:agent_id/tier', asyncHandler(async (req, res) => {
  * PUT /agents/:agent_id/status
  * Update agent status
  */
-router.put('/:agent_id/status', asyncHandler(async (req, res) => {
+router.put('/:agent_id/status', authenticateJWT, asyncHandler(async (req, res) => {
   const { agent_id } = req.params;
   const { status } = req.body;
 
@@ -255,7 +256,7 @@ router.put('/:agent_id/status', asyncHandler(async (req, res) => {
  * PUT /agents/:agent_id/permissions
  * Update agent permissions
  */
-router.put('/:agent_id/permissions', asyncHandler(async (req, res) => {
+router.put('/:agent_id/permissions', authenticateJWT, asyncHandler(async (req, res) => {
   const { agent_id } = req.params;
   const { permissions } = req.body;
 
@@ -283,7 +284,7 @@ router.put('/:agent_id/permissions', asyncHandler(async (req, res) => {
  * DELETE /agents/:agent_id
  * Delete agent
  */
-router.delete('/:agent_id', asyncHandler(async (req, res) => {
+router.delete('/:agent_id', authenticateJWT, asyncHandler(async (req, res) => {
   const { agent_id } = req.params;
 
   await agentService.deleteAgent(agent_id);
@@ -302,7 +303,7 @@ router.delete('/:agent_id', asyncHandler(async (req, res) => {
  * GET /agents/:agent_id/activity
  * Get agent activity logs
  */
-router.get('/:agent_id/activity', asyncHandler(async (req, res) => {
+router.get('/:agent_id/activity', authenticateJWT, asyncHandler(async (req, res) => {
   const { agent_id } = req.params;
   const limit = parseInt(req.query.limit) || 100;
   const offset = parseInt(req.query.offset) || 0;

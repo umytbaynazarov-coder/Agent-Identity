@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const webhookService = require('../services/webhookService');
 const webhookValidator = require('../validators/webhookValidator');
+const { authenticateJWT } = require('../middleware/auth');
 const { APIError, asyncHandler } = require('../middleware/errorHandler');
 const logger = require('../config/logger');
 
@@ -9,7 +10,7 @@ const logger = require('../config/logger');
  * POST /webhooks
  * Create a new webhook
  */
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', authenticateJWT, asyncHandler(async (req, res) => {
   // Validate input
   const validation = webhookValidator.validateWebhookCreation(req.body);
   if (!validation.valid) {
@@ -32,7 +33,7 @@ router.post('/', asyncHandler(async (req, res) => {
  * GET /webhooks
  * List webhooks for an agent
  */
-router.get('/', asyncHandler(async (req, res) => {
+router.get('/', authenticateJWT, asyncHandler(async (req, res) => {
   const { agent_id } = req.query;
 
   if (!agent_id) {
@@ -58,7 +59,7 @@ router.get('/events', (req, res) => {
  * GET /webhooks/:webhook_id
  * Get webhook details
  */
-router.get('/:webhook_id', asyncHandler(async (req, res) => {
+router.get('/:webhook_id', authenticateJWT, asyncHandler(async (req, res) => {
   const { webhook_id } = req.params;
 
   const webhook = await webhookService.getWebhookById(webhook_id);
@@ -74,7 +75,7 @@ router.get('/:webhook_id', asyncHandler(async (req, res) => {
  * PUT /webhooks/:webhook_id
  * Update webhook
  */
-router.put('/:webhook_id', asyncHandler(async (req, res) => {
+router.put('/:webhook_id', authenticateJWT, asyncHandler(async (req, res) => {
   const { webhook_id } = req.params;
 
   // Validate input
@@ -97,7 +98,7 @@ router.put('/:webhook_id', asyncHandler(async (req, res) => {
  * DELETE /webhooks/:webhook_id
  * Delete webhook
  */
-router.delete('/:webhook_id', asyncHandler(async (req, res) => {
+router.delete('/:webhook_id', authenticateJWT, asyncHandler(async (req, res) => {
   const { webhook_id } = req.params;
 
   await webhookService.deleteWebhook(webhook_id);
@@ -116,7 +117,7 @@ router.delete('/:webhook_id', asyncHandler(async (req, res) => {
  * POST /webhooks/:webhook_id/regenerate-secret
  * Regenerate webhook secret
  */
-router.post('/:webhook_id/regenerate-secret', asyncHandler(async (req, res) => {
+router.post('/:webhook_id/regenerate-secret', authenticateJWT, asyncHandler(async (req, res) => {
   const { webhook_id } = req.params;
 
   const webhook = await webhookService.regenerateWebhookSecret(webhook_id);
@@ -137,7 +138,7 @@ router.post('/:webhook_id/regenerate-secret', asyncHandler(async (req, res) => {
  * POST /webhooks/:webhook_id/toggle
  * Toggle webhook active status
  */
-router.post('/:webhook_id/toggle', asyncHandler(async (req, res) => {
+router.post('/:webhook_id/toggle', authenticateJWT, asyncHandler(async (req, res) => {
   const { webhook_id } = req.params;
   const { is_active } = req.body;
 
@@ -159,7 +160,7 @@ router.post('/:webhook_id/toggle', asyncHandler(async (req, res) => {
  * GET /webhooks/:webhook_id/deliveries
  * Get webhook delivery history
  */
-router.get('/:webhook_id/deliveries', asyncHandler(async (req, res) => {
+router.get('/:webhook_id/deliveries', authenticateJWT, asyncHandler(async (req, res) => {
   const { webhook_id } = req.params;
   const limit = parseInt(req.query.limit) || 50;
   const offset = parseInt(req.query.offset) || 0;
