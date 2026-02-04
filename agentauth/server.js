@@ -150,6 +150,19 @@ if (webhookRoutes) {
 }
 
 // ============================================
+// DEBUG ENDPOINT (Temporary - for deployment verification)
+// ============================================
+app.get('/v1/debug/deployment', (req, res) => {
+  res.json({
+    message: 'Auth middleware code IS deployed',
+    commit: 'f116767-with-auth-middleware',
+    authMiddlewareExists: true,
+    timestamp: new Date().toISOString(),
+    nodeVersion: process.version,
+  });
+});
+
+// ============================================
 // ERROR HANDLING
 // ============================================
 
